@@ -1959,13 +1959,48 @@ async function commitImport() {
   );
 }
 
+async function importExcelBuffer(buffer, fileName) {
+  if (!window.XLSX) {
+    notify('در حال بارگذاری کتابخانهٔ اکسل...');
+    await loadScript(
+      'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
+    );
+  }
+
+  if (!window.XLSX) {
+    throw new Error('کتابخانهٔ اکسل بارگذاری نشد. اتصال اینترنت را بررسی کن.');
+  }
+
+  notify('در حال خواندن اطلاعات اکسل...');
+
+  const workbook = window.XLSX.read(buffer, {
+    type: 'array',
+    cellDates: false
+  });
+
+  if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+    throw new Error('این فایل برگهٔ قابل‌خواندن ندارد.');
+  }
+
+  const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = window.XLSX.utils.sheet_to_json(firstSheet, {
+    header: 1,
+    defval: '',
+    raw: true
+  });
+
+  if (!rows || rows.length === 0) {
+    throw new Error('برگهٔ اول فایل اکسل خالی است.');
+  }
+
+  await buildImportPreview(rows, fileName);
+}
+
 $('importFile').onchange = async e => {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
 
   try {
-    let rows;
-
     if (/\.csv$|\.txt$/i.test(file.name)) {
       const text = await new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1976,67 +2011,73 @@ $('importFile').onchange = async e => {
         reader.readAsText(file, 'UTF-8');
       });
 
-      rows = parseCSV(text);
+      await buildImportPreview(parseCSV(text), file.name);
 
     } else if (/\.xlsx$|\.xls$/i.test(file.name)) {
-      notify('در حال آماده‌سازی فایل اکسل...');
-
-      if (!window.XLSX) {
-        await loadScript(
-          'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
-        );
-      }
-
-      if (!window.XLSX) {
-        throw new Error('کتابخانهٔ اکسل بارگذاری نشد.');
-      }
-
       const buffer = await new Promise((resolve, reject) => {
         const reader = new FileReader();
-
         reader.onload = () => resolve(reader.result);
         reader.onerror = () => reject(
           new Error('خواندن فایل اکسل ناموفق بود.')
         );
-
         reader.readAsArrayBuffer(file);
       });
 
-      notify('در حال خواندن اطلاعات اکسل...');
-
-      const workbook = window.XLSX.read(buffer, {
-        type: 'array'
-      });
-
-      if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
-        throw new Error('این فایل برگهٔ قابل‌خواندن ندارد.');
-      }
-
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-
-      rows = window.XLSX.utils.sheet_to_json(firstSheet, {
-        header: 1,
-        defval: ''
-      });
-
-      if (!rows || rows.length === 0) {
-        throw new Error('برگهٔ اول فایل اکسل خالی است.');
-      }
+      await importExcelBuffer(buffer, file.name);
 
     } else {
       throw new Error('فقط فایل‌های XLSX، XLS، CSV و TXT پشتیبانی می‌شوند.');
     }
-
-    await buildImportPreview(rows, file.name);
-
   } catch (err) {
     console.error('Excel import error:', err);
-    notify(
-      'خطا در ورود فایل: ' +
-      (err && err.message ? err.message : 'خطای ناشناخته')
-    );
+    notify('خطا در ورود فایل: ' +
+      (err && err.message ? err.message : 'خطای ناشناخته'));
   } finally {
     e.target.value = '';
+  }
+};
+
+// Fallback for the rare case where Android recreates the Activity while
+// the system file picker is open and the original WebView callback is lost.
+window.__checkNativeSelectedFile = async function() {
+  const bridge = window.AndroidFileBridge;
+  if (!bridge || !bridge.hasPendingFile()) return;
+
+  try {
+    const size = bridge.getPendingFileSize();
+    const name = bridge.getPendingFileName() || 'import.xlsx';
+    if (!size) return;
+
+    notify('در حال بازیابی فایل انتخاب‌شده...');
+    const chunkSize = 48 * 1024;
+    const chunks = [];
+
+    for (let offset = 0; offset < size; offset += chunkSize) {
+      const encoded = bridge.readPendingFileChunk(offset, chunkSize);
+      if (!encoded) throw new Error('بازیابی بخشی از فایل ناموفق بود.');
+
+      const binary = atob(encoded);
+      const chunk = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        chunk[i] = binary.charCodeAt(i);
+      }
+      chunks.push(chunk);
+    }
+
+    const bytes = new Uint8Array(size);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.length;
+    }
+
+    bridge.clearPendingFile();
+    await importExcelBuffer(bytes.buffer, name);
+  } catch (err) {
+    console.error('Native file recovery error:', err);
+    try { bridge.clearPendingFile(); } catch (_) {}
+    notify('بازیابی فایل ناموفق بود: ' +
+      (err && err.message ? err.message : 'خطای ناشناخته'));
   }
 };
 
