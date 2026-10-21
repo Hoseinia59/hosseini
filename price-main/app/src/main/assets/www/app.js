@@ -1960,39 +1960,87 @@ async function commitImport() {
 }
 
 $('importFile').onchange = async e => {
-  const file = e.target.files[0];
+  const file = e.target.files && e.target.files[0];
   if (!file) return;
 
   try {
     let rows;
 
     if (/\.csv$|\.txt$/i.test(file.name)) {
-      rows = parseCSV(await file.text());
+      const text = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(
+          new Error('خواندن فایل متنی ناموفق بود.')
+        );
+        reader.readAsText(file, 'UTF-8');
+      });
+
+      rows = parseCSV(text);
+
     } else if (/\.xlsx$|\.xls$/i.test(file.name)) {
+      notify('در حال آماده‌سازی فایل اکسل...');
+
       if (!window.XLSX) {
         await loadScript(
           'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
         );
       }
 
-      const ab = await file.arrayBuffer();
-      const wb = XLSX.read(ab, { type: 'array' });
+      if (!window.XLSX) {
+        throw new Error('کتابخانهٔ اکسل بارگذاری نشد.');
+      }
 
-      rows = XLSX.utils.sheet_to_json(
-        wb.Sheets[wb.SheetNames[0]],
-        { header: 1, defval: '' }
-      );
+      const buffer = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(
+          new Error('خواندن فایل اکسل ناموفق بود.')
+        );
+
+        reader.readAsArrayBuffer(file);
+      });
+
+      notify('در حال خواندن اطلاعات اکسل...');
+
+      const workbook = window.XLSX.read(buffer, {
+        type: 'array'
+      });
+
+      if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+        throw new Error('این فایل برگهٔ قابل‌خواندن ندارد.');
+      }
+
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+
+      rows = window.XLSX.utils.sheet_to_json(firstSheet, {
+        header: 1,
+        defval: ''
+      });
+
+      if (!rows || rows.length === 0) {
+        throw new Error('برگهٔ اول فایل اکسل خالی است.');
+      }
+
     } else {
-      throw new Error('فرمت فایل پشتیبانی نمی‌شود');
+      throw new Error('فقط فایل‌های XLSX، XLS، CSV و TXT پشتیبانی می‌شوند.');
     }
 
     await buildImportPreview(rows, file.name);
+
   } catch (err) {
-    notify('خطا در ورود: ' + err.message);
+    console.error('Excel import error:', err);
+    notify(
+      'خطا در ورود فایل: ' +
+      (err && err.message ? err.message : 'خطای ناشناخته')
+    );
   } finally {
     e.target.value = '';
   }
 };
+
+
 
 /* -------------------------------- رویدادهای عمومی رابط -------------------------------- */
 
