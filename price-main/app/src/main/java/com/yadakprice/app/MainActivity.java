@@ -128,11 +128,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+       if (savedInstanceState != null) {
+    if (webView.restoreState(savedInstanceState) == null) {
         webView.loadUrl(
                 "https://" + VIRTUAL_DOMAIN
                         + "/assets/www/index.html"
         );
     }
+} else {
+    webView.loadUrl(
+            "https://" + VIRTUAL_DOMAIN
+                    + "/assets/www/index.html"
+    );
+}
 
     private void handleWebPermissionRequest(
             @NonNull PermissionRequest request
