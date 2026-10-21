@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.YadakPrice" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:statusBarColor">#111827</item>
+        <item name="android:windowBackground">#F3F5F8</item>
+    </style>
+</resources>

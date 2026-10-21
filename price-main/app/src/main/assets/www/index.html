@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111e">
+  <meta name="description" content="یدک‌پرایس؛ موتور هوشمند جست‌وجو و قیمت‌گذاری قطعات یدکی خودرو">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg">
+  <link rel="stylesheet" href="style.css">
+
+  <title>یدک‌پرایس | قیمت‌یاب قطعات یدکی</title>
+
+  <style>
+    /* سربرگ اختصاصی یدک‌پرایس */
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 22px 18px;
+      padding-top: calc(22px + env(safe-area-inset-top, 0px));
+      min-height: 125px;
+      background:
+        radial-gradient(ellipse at 85% 15%, #193753 0%, transparent 55%),
+        linear-gradient(125deg, #040912, #0c1a2a 65%, #101d2b);
+      color: #fff;
+      border-bottom: 2px solid #c99b20;
+      box-shadow: 0 10px 30px rgba(0,0,0,.28);
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 58px;
+      height: 58px;
+      flex: 0 0 58px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #d6aa35;
+      border-radius: 16px;
+      background: linear-gradient(145deg, #192d41, #07111e);
+      color: #ffd34f;
+      font-size: 32px;
+      box-shadow: 0 0 22px rgba(233,185,42,.12);
+    }
+
+    .top .eyebrow {
+      color: #e8bd49;
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .4px;
+      opacity: 1;
+    }
+
+    .top h1 {
+      margin-top: 5px;
+      color: #ffd34f;
+      font-size: 1.65rem;
+      font-weight: 900;
+      letter-spacing: -.4px;
+    }
+
+    .top p {
+      color: #c0ccda;
+      font-size: .78rem;
+      line-height: 1.9;
+      margin-top: 4px;
+    }
+
+    .top #installBtn {
+      flex: 0 0 auto;
+    }
+
+    @media (max-width: 480px) {
+      .top {
+        padding-right: 12px;
+        padding-left: 12px;
+        min-height: 108px;
+        gap: 8px;
+      }
+
+      .brand-area {
+        gap: 9px;
+      }
+
+      .brand-mark {
+        width: 44px;
+        height: 44px;
+        flex-basis: 44px;
+        border-radius: 12px;
+        font-size: 25px;
+      }
+
+      .top h1 {
+        font-size: 1.35rem;
+      }
+
+      .top .eyebrow {
+        font-size: .56rem;
+      }
+
+      .top p {
+        font-size: .69rem;
+      }
+    }
+
+    .search-panel {
+      border-top: 2px solid #c99b20;
+    }
+
+    #search {
+      min-width: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      max-width: 100%;
+    }
+
+    button {
+      touch-action: manipulation;
+    }
+
+    .tab,
+    .primary,
+    .ghost,
+    .icon-btn,
+    .small-btn {
+      transition: background-color .18s, border-color .18s, transform .18s;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid #ffd34f;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const searchBtn = document.getElementById('dashboardSearch');
+  const scanBtn = document.getElementById('dashboardScan');
+
+  if (searchBtn) {
+    searchBtn.addEventListener('click', function () {
+      const search = document.getElementById('search');
+      if (search) {
+        search.focus();
+        search.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }
+
+  if (scanBtn) {
+    scanBtn.addEventListener('click', function () {
+      const scanner = document.getElementById('scanBarcodeBtn');
+      if (scanner) scanner.click();
+    });
+  }
+
+  document.querySelectorAll('[data-dashboard-tab]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const tab = document.querySelector(
+        '.tab[data-tab="' + btn.dataset.dashboardTab + '"]'
+      );
+      if (tab) tab.click();
+    });
+  });
+});
+</script>
+<body class="home-view">
+
+  <header class="top">
+    <div class="brand-area">
+      <div class="brand-mark" aria-hidden="true">✦</div>
+      <div>
+        <div class="eyebrow">SMART AUTO PARTS · PRICE ENGINE</div>
+        <h1>یدک‌پرایس</h1>
+        <p>مرکز هوشمند جست‌وجو و قیمت‌گذاری قطعات خودرو</p>
+      </div>
+    </div>
+
+    <button id="installBtn" class="ghost hidden" type="button">
+      نصب برنامه
+    </button>
+  </header>
+  
+<!-- منوی کشویی یدک‌پرایس -->
+<button id="menuToggle" class="menu-toggle" type="button" aria-label="باز کردن منو">☰</button>
+
+<div id="menuShade" class="menu-shade"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="منوی اصلی">
+  <div class="menu-brand">
+    <img class="menu-logo" src="brand-logo.svg" alt="" />
+    <strong>یدک <span>پرایس</span></strong>
+    <button id="menuClose" type="button" aria-label="بستن منو">✕</button>
+  </div>
+  <button data-goto="home"><span class="menu-icon">⌂</span> صفحه اصلی <span class="menu-arrow">‹</span></button>
+  <button data-goto="search"><span class="menu-icon">⌕</span> جستجوی قطعه <span class="menu-arrow">‹</span></button>
+  <button data-goto="scanBarcodeBtn"><span class="menu-icon">▥</span> اسکن بارکد <span class="menu-arrow">‹</span></button>
+  <button data-goto="products"><span class="menu-icon">▦</span> فهرست کالاها <span class="menu-arrow">‹</span></button>
+  <button data-goto="history"><span class="menu-icon">◷</span> تاریخچه قیمت <span class="menu-arrow">‹</span></button>
+  <button data-goto="tools"><span class="menu-icon">▤</span> ورود Excel و PDF <span class="menu-arrow">‹</span></button>
+  <button data-goto="rules"><span class="menu-icon">٪</span> قواعد سود <span class="menu-arrow">‹</span></button>
+  <button data-goto="settingsBtn"><span class="menu-icon">⚙</span> تنظیمات قیمت <span class="menu-arrow">‹</span></button>
+  <button data-goto="appearanceBtn"><span class="menu-icon">◐</span> تنظیمات ظاهر <span class="menu-arrow">‹</span></button>
+  <button data-goto="backupBtn"><span class="menu-icon">▤</span> پشتیبان‌گیری <span class="menu-arrow">‹</span></button>
+  <button data-goto="restoreFile"><span class="menu-icon">↻</span> بازیابی پشتیبان <span class="menu-arrow">‹</span></button>
+  <div class="menu-support"><span class="menu-icon">☏</span><div><b>پشتیبانی</b><small>پاسخگوی شما هستیم</small></div></div>
+</nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const menu = document.getElementById('sideMenu');
+  const shade = document.getElementById('menuShade');
+  const toggle = document.getElementById('menuToggle');
+  const closeButton = document.getElementById('menuClose');
+  function closeMenu() {
+    menu.classList.remove('open');
+    shade.classList.remove('open');
+    document.body.classList.remove('menu-open');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'باز کردن منو');
+  }
+  function openMenu() {
+    menu.classList.add('open');
+    shade.classList.add('open');
+    document.body.classList.add('menu-open');
+    toggle.setAttribute('aria-expanded', 'true');
+    toggle.setAttribute('aria-label', 'بستن منو');
+  }
+  // Always start with the drawer closed after a fresh app load.
+  closeMenu();
+  toggle.addEventListener('click', () => menu.classList.contains('open') ? closeMenu() : openMenu());
+  closeButton.addEventListener('click', closeMenu);
+  shade.addEventListener('click', closeMenu);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+  menu.querySelectorAll('[data-goto]').forEach(button => button.addEventListener('click', function () {
+    const target = this.dataset.goto;
+    closeMenu();
+    if (target === 'home') {
+      document.body.classList.add('home-view'); window.scrollTo({top:0, behavior:'smooth'}); return;
+    }
+    document.body.classList.remove('home-view');
+    if (target === 'search') {
+      const input = document.getElementById('search'); input?.focus();
+      input?.scrollIntoView({behavior:'smooth', block:'center'}); return;
+    }
+    if (target === 'restoreFile') {
+      document.querySelector('.tab[data-tab="tools"]')?.click();
+      document.getElementById('tools')?.scrollIntoView({behavior:'smooth', block:'start'});
+      document.getElementById('restoreFile')?.click(); return;
+    }
+    if (['settingsBtn','backupBtn','appearanceBtn'].includes(target)) {
+      document.querySelector('.tab[data-tab="tools"]')?.click();
+      document.getElementById('tools')?.scrollIntoView({behavior:'smooth', block:'start'});
+      document.getElementById(target)?.click(); return;
+    }
+    if (target === 'scanBarcodeBtn') {
+      document.getElementById(target)?.click(); return;
+    }
+    const tab = document.querySelector('.tab[data-tab="' + target + '"]');
+    if (tab) {
+      tab.click();
+      const pane = document.getElementById(target);
+      pane?.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  }));
+});
+</script>
+  
+  <main>
+    
+<section class="car-hero" aria-label="صفحه اصلی یدک پرایس">
+  <div class="hero-brand" aria-label="لوگوی یدک پرایس">
+    <img class="hero-logo-image" src="brand-logo.svg" alt="لوگوی یدک پرایس" />
+    <div class="hero-wordmark"><span>یدک</span> <b>پرایس</b></div>
+    <div class="hero-tagline">قیمت واقعی لوازم یدکی خودرو</div>
+  </div>
+  <img src="car.png.webp" alt="خودروی مشکی در گاراژ تاریک با نورپردازی آبی" />
+  <div class="hero-bottom-lines" aria-hidden="true"></div>
+</section>
+
+    <section class="search-panel card">
+      <div class="search-line">
+        <input
+          id="search"
+          type="text"
+          placeholder="نام قطعه، کد فنی، OEM، بارکد، برند یا خودرو را بنویس…"
+          autocomplete="off"
+        >
+
+        <button
+          id="scanBarcodeBtn"
+          class="icon-btn"
+          type="button"
+          title="اسکن بارکد"
+          aria-label="اسکن بارکد"
+        >📷</button>
+
+        <button
+          id="scanTextBtn"
+          class="icon-btn"
+          type="button"
+          title="خواندن نوشته قطعه"
+          aria-label="خواندن نوشته قطعه"
+        >🔤</button>
+
+        <button
+          id="voiceBtn"
+          class="icon-btn"
+          type="button"
+          title="جست‌وجوی صوتی"
+          aria-label="جست‌وجوی صوتی"
+        >🎙️</button>
+
+        <button
+          id="clearSearch"
+          class="icon-btn"
+          type="button"
+          title="پاک کردن"
+          aria-label="پاک کردن جست‌وجو"
+        >×</button>
+      </div>
+
+      <div class="quick-stats">
+        <span id="countStat">۰ کالا</span>
+        <span id="dbStat">ذخیره‌شده روی همین دستگاه</span>
+      </div>
+
+      <div class="filter-line">
+        <select id="filterBrand" aria-label="فیلتر برند">
+          <option value="">همه برندها</option>
+        </select>
+
+        <select id="filterSource" aria-label="فیلتر منبع">
+          <option value="">همه منابع</option>
+        </select>
+
+        <select id="filterPriceType" aria-label="نوع قیمت">
+          <option value="">همه انواع قیمت</option>
+          <option value="base">قیمت پایه (مشمول سود)</option>
+          <option value="final">قیمت نهایی (بدون سود اضافه)</option>
+        </select>
+
+        <input
+          id="filterMinPrice"
+          type="number"
+          min="0"
+          placeholder="حداقل قیمت فروش"
+          inputmode="decimal"
+          aria-label="حداقل قیمت فروش"
+        >
+
+        <input
+          id="filterMaxPrice"
+          type="number"
+          min="0"
+          placeholder="حداکثر قیمت فروش"
+          inputmode="decimal"
+          aria-label="حداکثر قیمت فروش"
+        >
+
+        <label class="chk">
+          <input id="filterHasCode" type="checkbox">
+          فقط دارای کد فنی
+        </label>
+
+        <button id="clearFilters" class="ghost small" type="button">
+          پاک‌کردن فیلترها
+        </button>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="بخش‌های برنامه">
+      <button class="tab active" type="button" data-tab="products">کالاها</button>
+      <button class="tab" type="button" data-tab="rules">قواعد سود</button>
+      <button class="tab" type="button" data-tab="history">تاریخچه</button>
+      <button class="tab" type="button" data-tab="tools">ورود و پشتیبان</button>
+    </nav>
+
+    <section id="products" class="pane active">
+      <div class="section-head">
+        <div>
+          <h2>فهرست کالاها</h2>
+          <p>قیمت فروش براساس قوانین سود به‌صورت خودکار محاسبه می‌شود.</p>
+        </div>
+
+        <button id="addBtn" class="primary" type="button">
+          ＋ کالای جدید
+        </button>
+      </div>
+
+      <div id="productList" class="product-list"></div>
+
+      <div id="emptyProducts" class="empty">
+        هنوز کالایی ثبت نشده است.<br>
+        از «کالای جدید» یا بخش ورود اطلاعات شروع کن.
+      </div>
+
+      <button id="loadMoreBtn" class="ghost full hidden" type="button">
+        نمایش موارد بیشتر
+      </button>
+    </section>
+
+    <section id="rules" class="pane">
+      <div class="section-head">
+        <div>
+          <h2>قواعد سود گروهی</h2>
+          <p>
+            مثلاً سود لنت برند اتحاد موتور را از سود پیش‌فرض به ۱۰٪ تغییر بده.
+            اگر چند قاعده هم‌زمان منطبق باشند، دقیق‌ترین قاعده اعمال می‌شود.
+          </p>
+        </div>
+      </div>
+
+      <form id="ruleForm" class="card form-grid">
+        <label>
+          عبارت در نام کالا
+          <input id="ruleTerm" placeholder="مثلاً لنت">
+        </label>
+
+        <label>
+          برند (اختیاری)
+          <input id="ruleBrand" placeholder="مثلاً اتحاد موتور">
+        </label>
+
+        <label>
+          درصد سود
+          <input
+            id="rulePercent"
+            type="number"
+            min="0"
+            max="500"
+            step="0.1"
+            value="10"
+            required
+          >
+        </label>
+
+        <button class="primary" type="submit">
+          اعمال قاعده روی کالاهای منطبق
+        </button>
+      </form>
+
+      <div id="ruleList" class="stack"></div>
+    </section>
+
+    <section id="history" class="pane">
+      <div class="section-head">
+        <div>
+          <h2>تاریخچه تغییرات</h2>
+          <p>قیمت پایه، درصد سود، قیمت فروش قبلی و جدید، زمان و عامل تغییر.</p>
+        </div>
+
+        <button id="clearHistory" class="ghost" type="button">
+          پاک‌کردن تاریخچه
+        </button>
+      </div>
+
+      <div class="filter-line">
+        <input
+          id="historySearch"
+          type="text"
+          placeholder="جست‌وجو در تاریخچه (نام کالا، فیلد، عامل)…"
+        >
+      </div>
+
+      <div id="historyList" class="stack"></div>
+
+      <button id="historyMoreBtn" class="ghost full hidden" type="button">
+        نمایش موارد بیشتر
+      </button>
+    </section>
+
+    <section id="tools" class="pane">
+      <div class="section-head">
+        <div>
+          <h2>ورود اطلاعات و پشتیبان</h2>
+          <p>فایل‌ها روی همین دستگاه پردازش می‌شوند و پیش از ثبت نهایی قابل بررسی‌اند.</p>
+        </div>
+      </div>
+
+      <div class="tool-grid">
+
+        <label class="tool-card">
+          <span class="tool-icon">📊</span>
+          <b>ورود Excel / CSV</b>
+          <small>ورود فایل‌های Excel و CSV و بررسی اطلاعات قبل از ثبت.</small>
+          <input id="importFile" type="file" accept=".xlsx,.xls,.csv,.txt">
+        </label>
+
+        <label class="tool-card">
+          <span class="tool-icon">📄</span>
+          <b>ورود PDF و استخراج قیمت</b>
+          <small>استخراج متن PDF و تشخیص اولیه قیمت‌ها؛ برای PDF اسکن‌شده از OCR استفاده می‌شود.</small>
+          <input id="pdfFile" type="file" accept=".pdf,application/pdf">
+        </label>
+
+        <label class="tool-card">
+          <span class="tool-icon">🖼️</span>
+          <b>ورود عکس لیست قیمت</b>
+          <small>تشخیص متن فارسی و انگلیسی از عکس‌های JPG، PNG و WebP با OCR.</small>
+          <input
+            id="imageFile"
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/bmp"
+          >
+        </label>
+
+        <button id="exportCsv" type="button" class="tool-card">
+          <span class="tool-icon">⬇️</span>
+          <b>خروجی کالاها (CSV)</b>
+          <small>قابل بازکردن در Excel</small>
+        </button>
+
+        <button id="backupBtn" type="button" class="tool-card">
+          <span class="tool-icon">🛡️</span>
+          <b>پشتیبان کامل</b>
+          <small>کالاها، قواعد، تاریخچه، منابع و تنظیمات</small>
+        </button>
+
+        <label class="tool-card">
+          <span class="tool-icon">♻️</span>
+          <b>بازیابی پشتیبان</b>
+          <small>فایل JSON خروجی همین برنامه</small>
+          <input id="restoreFile" type="file" accept=".json,application/json">
+        </label>
+
+        <button id="settingsBtn" type="button" class="tool-card">
+          <span class="tool-icon">⚙️</span>
+          <b>تنظیمات قیمت</b>
+          <small>سود پیش‌فرض، واحد پول و نام کاربر</small>
+        </button>
+
+        <button id="appearanceBtn" type="button" class="tool-card">
+          <span class="tool-icon">🎨</span>
+          <b>تنظیمات ظاهر</b>
+          <small>تم روشن و تاریک، رنگ برنامه، اندازه و نوع فونت</small>
+        </button>
+
+      </div>
+
+      <div class="card note">
+        <b>نکته مهم:</b>
+        هر ورود فایل پیش از ثبت نهایی، در قالب پیش‌نمایش شامل کالای جدید،
+        تغییر قیمت، بدون تغییر و نامعتبر نشان داده می‌شود و فقط با تأیید شما ثبت خواهد شد.
+        داده‌ها روی همین دستگاه ذخیره می‌شوند؛ مرتب پشتیبان بگیر.
+      </div>
+
+      <div class="card">
+        <h3>مدیریت منابع قیمت</h3>
+
+        <form id="sourceForm" class="form-grid">
+          <label>
+            نام منبع
+            <input id="sourceName" placeholder="مثلاً لیست قیمت مهر">
+          </label>
+
+          <label>
+            نوع منبع
+            <input id="sourceType" placeholder="Excel، PDF، تلگرام، دستی…">
+          </label>
+
+          <button class="primary" type="submit">ثبت منبع دستی</button>
+        </form>
+
+        <div id="sourceList" class="stack"></div>
+      </div>
+    </section>
+
+  </main>
+
+  
+<section class="brand-showcase" aria-label="داشبورد یدک‌پرایس">
+  <div class="showcase-corner showcase-corner-top"></div>
+
+  <div class="showcase-brand">
+    <div class="showcase-logo">⚙</div>
+    <div>
+      <div class="showcase-title">یدک <span>پرایس</span></div>
+      <div class="showcase-subtitle">قیمت واقعی لوازم یدکی خودرو</div>
+    </div>
+  </div>
+
+  <p class="showcase-description">
+    جست‌وجوی سریع و هوشمند · قیمت‌های به‌روز · تشخیص کد قطعه
+  </p>
+
+  <div class="showcase-shortcuts">
+    <button type="button" class="showcase-action" id="dashboardSearch">
+      <span>⌕</span>
+      <b>جست‌وجوی قطعه</b>
+      <small>نام، برند یا کد فنی</small>
+    </button>
+
+    <button type="button" class="showcase-action" id="dashboardScan">
+      <span>▥</span>
+      <b>اسکن قطعه</b>
+      <small>بارکد و کد فنی</small>
+    </button>
+
+    <button type="button" class="showcase-action" data-dashboard-tab="history">
+      <span>♡</span>
+      <b>تاریخچه</b>
+      <small>تغییرات قیمت</small>
+    </button>
+
+    <button type="button" class="showcase-action" data-dashboard-tab="tools">
+      <span>▤</span>
+      <b>فهرست و فایل‌ها</b>
+      <small>ورود Excel و PDF</small>
+    </button>
+  </div>
+
+  <div class="showcase-corner showcase-corner-bottom"></div>
+</section>
+
+  <footer>
+    یدک‌پرایس · هسته اصلی + موبایل · داده‌ها به‌صورت محلی روی این دستگاه ذخیره می‌شوند
+  </footer>
+
+  <!-- ابتدا هسته اصلی برنامه بارگذاری شود -->
+  <script src="app.js"></script>
+
+  <!-- موتور تشخیص PDF و عکس -->
+  <script src="ocr-engine.js"></script>
+
+</body>
+</html>

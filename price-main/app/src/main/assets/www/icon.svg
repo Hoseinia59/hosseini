@@ -1,0 +1,71 @@
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#152b42"/>
+      <stop offset="100%" stop-color="#030811"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffe98a"/>
+      <stop offset="50%" stop-color="#ffd044"/>
+      <stop offset="100%" stop-color="#c58b12"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+  <rect x="12" y="12" width="488" height="488" rx="100"
+        fill="none" stroke="#c99b20" stroke-width="5"/>
+
+  <path d="M100 298
+           L125 270
+           L151 214
+           Q160 194 185 190
+           L326 190
+           Q347 192 360 214
+           L389 266
+           L414 285
+           Q428 296 428 318
+           L428 348
+           L392 348
+           Q384 391 344 391
+           Q304 391 296 348
+           L216 348
+           Q208 391 168 391
+           Q128 391 120 348
+           L88 348
+           L88 318
+           Q88 306 100 298Z"
+        fill="url(#gold)"/>
+
+  <path d="M165 258 L185 218 Q190 208 204 208
+           L246 208 L246 258Z"
+        fill="#102033"/>
+
+  <path d="M262 208 L322 208 Q335 210 343 226
+           L361 258 L262 258Z"
+        fill="#102033"/>
+
+  <path d="M139 281 L378 281"
+        fill="none" stroke="#8b610d" stroke-width="7"
+        stroke-linecap="round"/>
+
+  <circle cx="168" cy="345" r="32" fill="#07111e"
+          stroke="#ffe17a" stroke-width="8"/>
+  <circle cx="168" cy="345" r="12" fill="url(#gold)"/>
+
+  <circle cx="344" cy="345" r="32" fill="#07111e"
+          stroke="#ffe17a" stroke-width="8"/>
+  <circle cx="344" cy="345" r="12" fill="url(#gold)"/>
+
+  <path d="M106 310 L132 310"
+        stroke="#fff0b0" stroke-width="8" stroke-linecap="round"/>
+  <path d="M390 310 L411 310"
+        stroke="#fff0b0" stroke-width="8" stroke-linecap="round"/>
+
+  <path d="M256 112 L266 136 L292 138
+           L272 154 L278 179 L256 165
+           L234 179 L240 154 L220 138
+           L246 136Z"
+        fill="url(#gold)"/>
+</svg>
+```

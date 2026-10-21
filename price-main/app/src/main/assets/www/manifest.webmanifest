@@ -1,0 +1,15 @@
+{
+  "name": "یدک‌پرایس | قیمت‌یاب قطعات یدکی",
+  "short_name": "یدک‌پرایس",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f5f8",
+  "theme_color": "#111827",
+  "description": "موتور جست‌وجو و قیمت‌گذاری قطعات یدکی خودرو",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
