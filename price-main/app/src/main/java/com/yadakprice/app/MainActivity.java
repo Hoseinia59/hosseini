@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -22,6 +23,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.webkit.WebViewAssetLoader;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +43,58 @@ public class MainActivity extends AppCompatActivity {
 
     private ValueCallback<Uri[]> fileChooserCallback;
     private PermissionRequest pendingWebPermissionRequest;
+
+    private final ExecutorService fileExecutor = Executors.newSingleThreadExecutor();
+    private final NativeFileBridge nativeFileBridge = new NativeFileBridge();
+
+    /**
+     * Used only as a recovery path if Android recreates MainActivity while
+     * the system file picker is open and the WebView file callback is lost.
+     * File bytes are returned in small chunks to avoid a huge JS bridge message.
+     */
+    private final class NativeFileBridge {
+        private volatile byte[] pendingBytes;
+        private volatile String pendingName = "";
+
+        synchronized void setPendingFile(String name, byte[] bytes) {
+            pendingName = name == null ? "import.xlsx" : name;
+            pendingBytes = bytes;
+        }
+
+        @JavascriptInterface
+        public boolean hasPendingFile() {
+            return pendingBytes != null && pendingBytes.length > 0;
+        }
+
+        @JavascriptInterface
+        public String getPendingFileName() {
+            return pendingName;
+        }
+
+        @JavascriptInterface
+        public int getPendingFileSize() {
+            return pendingBytes == null ? 0 : pendingBytes.length;
+        }
+
+        @JavascriptInterface
+        public String readPendingFileChunk(int offset, int length) {
+            byte[] bytes = pendingBytes;
+            if (bytes == null || offset < 0 || offset >= bytes.length || length <= 0) {
+                return "";
+            }
+            int end = Math.min(bytes.length, offset + Math.min(length, 48 * 1024));
+            return android.util.Base64.encodeToString(
+                    Arrays.copyOfRange(bytes, offset, end),
+                    android.util.Base64.NO_WRAP
+            );
+        }
+
+        @JavascriptInterface
+        public synchronized void clearPendingFile() {
+            pendingBytes = null;
+            pendingName = "";
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowContentAccess(true);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
+        webView.addJavascriptInterface(nativeFileBridge, "AndroidFileBridge");
+
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(
@@ -69,6 +129,15 @@ public class MainActivity extends AppCompatActivity {
                     WebResourceRequest request
             ) {
                 return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                view.evaluateJavascript(
+                        "if (window.__checkNativeSelectedFile) { window.__checkNativeSelectedFile(); }",
+                        null
+                );
             }
         });
 
@@ -251,29 +320,81 @@ public class MainActivity extends AppCompatActivity {
     ) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == FILE_CHOOSER_REQUEST
-                && fileChooserCallback != null) {
-
-            Uri[] results = null;
+        if (requestCode == FILE_CHOOSER_REQUEST) {
+            Uri selectedUri = null;
 
             if (resultCode == Activity.RESULT_OK && data != null) {
-                Uri uri = data.getData();
+                selectedUri = data.getData();
+                if (selectedUri == null && data.getClipData() != null
+                        && data.getClipData().getItemCount() > 0) {
+                    selectedUri = data.getClipData().getItemAt(0).getUri();
+                }
+            }
 
-                if (uri != null) {
-                    results = new Uri[]{uri};
+            if (fileChooserCallback != null) {
+                Uri[] results = selectedUri == null
+                        ? null
+                        : new Uri[]{selectedUri};
 
-                } else if (data.getClipData() != null) {
-                    int count = data.getClipData().getItemCount();
-                    results = new Uri[count];
+                fileChooserCallback.onReceiveValue(results);
+                fileChooserCallback = null;
+            } else if (selectedUri != null) {
+                // The Activity/WebView may have been recreated while the picker was open.
+                final Uri uriToRead = selectedUri;
+                fileExecutor.execute(() -> recoverSelectedFile(uriToRead));
+            }
+        }
+    }
 
-                    for (int i = 0; i < count; i++) {
-                        results[i] = data.getClipData().getItemAt(i).getUri();
+    private void recoverSelectedFile(Uri uri) {
+        try (InputStream input = getContentResolver().openInputStream(uri);
+             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+
+            if (input == null) {
+                return;
+            }
+
+            byte[] buffer = new byte[32 * 1024];
+            int read;
+            while ((read = input.read(buffer)) != -1) {
+                output.write(buffer, 0, read);
+            }
+
+            String name = "import.xlsx";
+            try (android.database.Cursor cursor = getContentResolver().query(
+                    uri,
+                    new String[]{android.provider.OpenableColumns.DISPLAY_NAME},
+                    null,
+                    null,
+                    null
+            )) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int column = cursor.getColumnIndex(
+                            android.provider.OpenableColumns.DISPLAY_NAME
+                    );
+                    if (column >= 0 && cursor.getString(column) != null) {
+                        name = cursor.getString(column);
                     }
                 }
             }
 
-            fileChooserCallback.onReceiveValue(results);
-            fileChooserCallback = null;
+            nativeFileBridge.setPendingFile(name, output.toByteArray());
+
+            runOnUiThread(() -> {
+                if (webView != null) {
+                    webView.evaluateJavascript(
+                            "if (window.__checkNativeSelectedFile) { window.__checkNativeSelectedFile(); }",
+                            null
+                    );
+                }
+            });
+
+        } catch (Exception e) {
+            runOnUiThread(() -> Toast.makeText(
+                    MainActivity.this,
+                    "خواندن فایل انتخاب‌شده ناموفق بود.",
+                    Toast.LENGTH_LONG
+            ).show());
         }
     }
 
@@ -293,6 +414,8 @@ public class MainActivity extends AppCompatActivity {
             webView.destroy();
             webView = null;
         }
+
+        fileExecutor.shutdownNow();
 
         super.onDestroy();
     }
