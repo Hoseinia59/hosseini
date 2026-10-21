@@ -286,6 +286,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function goTo(target) {
       closeMenu();
+      if (target === 'importExcel') {
+  selectTab('tools');
+
+  setTimeout(function () {
+    const input = document.getElementById('importFile');
+
+    if (input) {
+      input.click();
+    } else {
+      alert('بخش ورود Excel پیدا نشد.');
+    }
+  }, 250);
+
+  return;
+}
 
       if (target === 'home') {
         goHome();
