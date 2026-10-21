@@ -221,64 +221,169 @@ document.addEventListener('DOMContentLoaded', function () {
   <div class="menu-support"><span class="menu-icon">☏</span><div><b>پشتیبانی</b><small>پاسخگوی شما هستیم</small></div></div>
 </nav>
 
+
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const menu = document.getElementById('sideMenu');
-  const shade = document.getElementById('menuShade');
-  const toggle = document.getElementById('menuToggle');
-  const closeButton = document.getElementById('menuClose');
-  function closeMenu() {
-    menu.classList.remove('open');
-    shade.classList.remove('open');
-    document.body.classList.remove('menu-open');
-    toggle.setAttribute('aria-expanded', 'false');
-    toggle.setAttribute('aria-label', 'باز کردن منو');
-  }
-  function openMenu() {
-    menu.classList.add('open');
-    shade.classList.add('open');
-    document.body.classList.add('menu-open');
-    toggle.setAttribute('aria-expanded', 'true');
-    toggle.setAttribute('aria-label', 'بستن منو');
-  }
-  // Always start with the drawer closed after a fresh app load.
-  closeMenu();
-  toggle.addEventListener('click', () => menu.classList.contains('open') ? closeMenu() : openMenu());
-  closeButton.addEventListener('click', closeMenu);
-  shade.addEventListener('click', closeMenu);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
-  menu.querySelectorAll('[data-goto]').forEach(button => button.addEventListener('click', function () {
-    const target = this.dataset.goto;
+(function () {
+  function initYadakPriceMenu() {
+    const menu = document.getElementById('sideMenu');
+    const shade = document.getElementById('menuShade');
+    const toggle = document.getElementById('menuToggle');
+    const closeButton = document.getElementById('menuClose');
+
+    if (!menu || !shade || !toggle || !closeButton) {
+      console.error('Menu elements not found.');
+      return;
+    }
+
+    // Prevent duplicate event handlers.
+    if (menu.dataset.initialized === 'true') return;
+    menu.dataset.initialized = 'true';
+
+    function closeMenu() {
+      menu.classList.remove('open');
+      shade.classList.remove('open');
+      document.body.classList.remove('menu-open');
+
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', 'باز کردن منو');
+      menu.setAttribute('aria-hidden', 'true');
+    }
+
+    function openMenu() {
+      menu.classList.add('open');
+      shade.classList.add('open');
+      document.body.classList.add('menu-open');
+
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-label', 'بستن منو');
+      menu.setAttribute('aria-hidden', 'false');
+    }
+
+    function goHome() {
+      closeMenu();
+      document.body.classList.add('home-view');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function selectTab(name) {
+      const tab = document.querySelector(
+        '.tab[data-tab="' + name + '"]'
+      );
+
+      if (tab) {
+        tab.click();
+      }
+
+      const section = document.getElementById(name);
+
+      if (section) {
+        section.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }
+
+    function goTo(target) {
+      closeMenu();
+
+      if (target === 'home') {
+        goHome();
+        return;
+      }
+
+      document.body.classList.remove('home-view');
+
+      if (target === 'search') {
+        const search = document.getElementById('search');
+
+        if (search) {
+          search.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+
+          search.focus({ preventScroll: true });
+        }
+        return;
+      }
+
+      if (target === 'scanBarcodeBtn') {
+        const scanner = document.getElementById('scanBarcodeBtn');
+        if (scanner) scanner.click();
+        return;
+      }
+
+      if (target === 'products' ||
+          target === 'history' ||
+          target === 'rules' ||
+          target === 'tools') {
+        selectTab(target);
+        return;
+      }
+
+      if (target === 'restoreFile') {
+        selectTab('tools');
+
+        const input = document.getElementById('restoreFile');
+        if (input) {
+          setTimeout(function () {
+            input.click();
+          }, 150);
+        }
+        return;
+      }
+
+      if (target === 'settingsBtn' ||
+          target === 'backupBtn' ||
+          target === 'appearanceBtn') {
+        selectTab('tools');
+
+        const button = document.getElementById(target);
+        if (button) {
+          setTimeout(function () {
+            button.click();
+          }, 150);
+        }
+      }
+    }
+
+    toggle.addEventListener('click', function () {
+      if (menu.classList.contains('open')) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+
+    closeButton.addEventListener('click', closeMenu);
+    shade.addEventListener('click', closeMenu);
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') closeMenu();
+    });
+
+    menu.querySelectorAll('[data-goto]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        goTo(this.dataset.goto);
+      });
+    });
+
+    // Start on the home screen with the menu closed.
     closeMenu();
-    if (target === 'home') {
-      document.body.classList.add('home-view'); window.scrollTo({top:0, behavior:'smooth'}); return;
-    }
-    document.body.classList.remove('home-view');
-    if (target === 'search') {
-      const input = document.getElementById('search'); input?.focus();
-      input?.scrollIntoView({behavior:'smooth', block:'center'}); return;
-    }
-    if (target === 'restoreFile') {
-      document.querySelector('.tab[data-tab="tools"]')?.click();
-      document.getElementById('tools')?.scrollIntoView({behavior:'smooth', block:'start'});
-      document.getElementById('restoreFile')?.click(); return;
-    }
-    if (['settingsBtn','backupBtn','appearanceBtn'].includes(target)) {
-      document.querySelector('.tab[data-tab="tools"]')?.click();
-      document.getElementById('tools')?.scrollIntoView({behavior:'smooth', block:'start'});
-      document.getElementById(target)?.click(); return;
-    }
-    if (target === 'scanBarcodeBtn') {
-      document.getElementById(target)?.click(); return;
-    }
-    const tab = document.querySelector('.tab[data-tab="' + target + '"]');
-    if (tab) {
-      tab.click();
-      const pane = document.getElementById(target);
-      pane?.scrollIntoView({behavior:'smooth', block:'start'});
-    }
-  }));
-});
+    document.body.classList.add('home-view');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded',
+      initYadakPriceMenu,
+      { once: true }
+    );
+  } else {
+    initYadakPriceMenu();
+  }
+})();
 </script>
   
   <main>
