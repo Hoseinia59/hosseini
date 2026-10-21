@@ -74,6 +74,13 @@ public class MainActivity extends AppCompatActivity {
                 );
             }
         });
+        @Override
+protected void onSaveInstanceState(Bundle outState) {
+    if (webView != null) {
+        webView.saveState(outState);
+    }
+    super.onSaveInstanceState(outState);
+}
 
         webView.setWebChromeClient(new WebChromeClient() {
 
