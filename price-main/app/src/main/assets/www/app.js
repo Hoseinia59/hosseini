@@ -180,6 +180,25 @@ function put(store, value) {
   });
 }
 
+// ثبت گروهی برای ورود فایل‌های بزرگ؛ از ساخت هزاران تراکنش جدا جلوگیری می‌کند.
+function putMany(store, values) {
+  if (!values || values.length === 0) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    let tx;
+    try {
+      tx = db.transaction(store, 'readwrite');
+      const objectStore = tx.objectStore(store);
+      for (const value of values) objectStore.put(value);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error || new Error('ثبت گروهی اطلاعات ناموفق بود.'));
+      tx.onabort = () => reject(tx.error || new Error('ثبت گروهی اطلاعات لغو شد.'));
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
 function del(store, key) {
   return new Promise((res, rej) => {
     const t = db.transaction(store, 'readwrite');
@@ -1584,8 +1603,11 @@ async function computeImportRows() {
   };
 
   // فقط اولین کالای موجود برای هر کلید حفظ می‌شود.
-  for (const product of existing) {
-    register(existingMap, product);
+  for (let i = 0; i < existing.length; i++) {
+    register(existingMap, existing[i]);
+    if (i > 0 && i % 1000 === 0) {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
   }
 
   const multiplier = priceMultiplierFromHeader(
@@ -1849,151 +1871,101 @@ function renderImportPreviewModal() {
 }
 
 async function commitImport() {
+  if (!pendingImport || !Array.isArray(pendingImport.rows)) {
+    notify('اطلاعات ورود برای ثبت پیدا نشد؛ فایل را دوباره انتخاب کن.');
+    return;
+  }
+
   const { rows, fileName } = pendingImport;
+  const BATCH_SIZE = 500;
+  let added = 0, updated = 0, skipped = 0, errors = 0;
 
-  let added = 0;
-  let updated = 0;
-  let skipped = 0;
-  let errors = 0;
+  const productsById = new Map((await all('products')).map(p => [p.id, p]));
+  const productsToWrite = [];
+  const historyToWrite = [];
+  const updatedIds = new Set();
+  const actor = await setting('actor', 'کاربر');
 
-  for (const r of rows) {
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+
     if (r.status === 'error') {
       errors++;
-      continue;
-    }
-
-    if (r.status === 'skip') {
+    } else if (r.status === 'skip') {
       skipped++;
-      continue;
-    }
-
-    if (r.status === 'updated' && r.existingId) {
-      const existing = await get('products', r.existingId);
-
+    } else if (r.status === 'updated' && r.existingId) {
+      const existing = productsById.get(r.existingId);
       if (!existing) {
         errors++;
-        continue;
+      } else if (updatedIds.has(r.existingId)) {
+        skipped++;
+      } else {
+        const next = {
+          ...existing,
+          name: r.name,
+          brand: r.brand || existing.brand,
+          cars: r.cars.length ? r.cars : existing.cars,
+          code: r.code || existing.code,
+          oem: r.oem || existing.oem,
+          barcode: r.barcode || existing.barcode,
+          basePrice: r.price,
+          priceType: r.priceType,
+          source: fileName,
+          updatedAt: new Date().toISOString()
+        };
+        productsToWrite.push(next);
+        historyToWrite.push({
+          id: uid(), productId: next.id, productName: next.name,
+          field: 'قیمت از فایل', oldValue: String(existing.basePrice ?? ''),
+          newValue: String(r.price ?? ''), actor,
+          at: new Date().toISOString(), displayAt: now()
+        });
+        updatedIds.add(r.existingId);
+        productsById.set(next.id, next);
+        updated++;
       }
-
-      const before = existing.basePrice;
-
-      const next = {
-        ...existing,
-        name: r.name,
-        brand: r.brand || existing.brand,
-        cars: r.cars.length ? r.cars : existing.cars,
-        code: r.code || existing.code,
-        oem: r.oem || existing.oem,
-        barcode: r.barcode || existing.barcode,
-        basePrice: r.price,
-        priceType: r.priceType,
-        source: fileName,
-        updatedAt: new Date().toISOString()
-      };
-
-      await put('products', next);
-
-      await audit(
-        next.id,
-        next.name,
-        'قیمت از فایل',
-        before,
-        r.price
-      );
-
-      updated++;
     } else if (r.status === 'new') {
-      const p = {
-        id: uid(),
-        name: r.name,
-        altNames: [],
-        brand: r.brand,
-        cars: r.cars,
-        code: r.code,
-        oem: r.oem,
-        barcode: r.barcode,
-        basePrice: r.price,
-        priceType: r.priceType,
-        itemProfitPercent: '',
-        source: fileName,
+      const product = {
+        id: uid(), name: r.name, altNames: [], brand: r.brand,
+        cars: r.cars, code: r.code, oem: r.oem, barcode: r.barcode,
+        basePrice: r.price, priceType: r.priceType,
+        itemProfitPercent: '', source: fileName,
         updatedAt: new Date().toISOString()
       };
-
-      await put('products', p);
-
-      await audit(
-        p.id,
-        p.name,
-        'ورود از فایل',
-        '',
-        r.price
-      );
-
+      productsToWrite.push(product);
+      historyToWrite.push({
+        id: uid(), productId: product.id, productName: product.name,
+        field: 'ورود از فایل', oldValue: '', newValue: String(r.price ?? ''),
+        actor, at: new Date().toISOString(), displayAt: now()
+      });
       added++;
+    }
+
+    if ((i + 1) % BATCH_SIZE === 0 || i === rows.length - 1) {
+      const productBatch = productsToWrite.splice(0, productsToWrite.length);
+      const historyBatch = historyToWrite.splice(0, historyToWrite.length);
+      try {
+        await putMany('products', productBatch);
+        await putMany('history', historyBatch);
+      } catch (err) {
+        console.error('Import batch failed:', err);
+        throw new Error('ثبت اطلاعات در پایگاه داده ناموفق بود. فضای ذخیره‌سازی و حافظهٔ دستگاه را بررسی کن.');
+      }
+      notify(`در حال ثبت اکسل: ${fmt(Math.min(i + 1, rows.length))} از ${fmt(rows.length)} ردیف`);
+      await new Promise(resolve => setTimeout(resolve, 0));
     }
   }
 
   await put('sources', {
-    id: uid(),
-    name: fileName,
-    type: 'ورود فایل',
-    fileName,
-    createdAt: new Date().toISOString(),
-    createdDisplay: now(),
-    newCount: added,
-    updatedCount: updated,
-    skippedCount: skipped,
-    errorCount: errors
+    id: uid(), name: fileName, type: 'ورود فایل', fileName,
+    createdAt: new Date().toISOString(), createdDisplay: now(),
+    newCount: added, updatedCount: updated, skippedCount: skipped, errorCount: errors
   });
 
   pendingImport = null;
   closeModal();
-
   await refreshAll();
-
-  notify(
-    `ورود تمام شد: ${fmt(added)} جدید، ` +
-    `${fmt(updated)} به‌روزرسانی، ` +
-    `${fmt(skipped)} بدون تغییر، ` +
-    `${fmt(errors)} نامعتبر.`
-  );
-}
-
-async function importExcelBuffer(buffer, fileName) {
-  if (!window.XLSX) {
-    notify('در حال بارگذاری کتابخانهٔ اکسل...');
-    await loadScript(
-      'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
-    );
-  }
-
-  if (!window.XLSX) {
-    throw new Error('کتابخانهٔ اکسل بارگذاری نشد. اتصال اینترنت را بررسی کن.');
-  }
-
-  notify('در حال خواندن اطلاعات اکسل...');
-
-  const workbook = window.XLSX.read(buffer, {
-    type: 'array',
-    cellDates: false
-  });
-
-  if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
-    throw new Error('این فایل برگهٔ قابل‌خواندن ندارد.');
-  }
-
-  const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = window.XLSX.utils.sheet_to_json(firstSheet, {
-    header: 1,
-    defval: '',
-    raw: true
-  });
-
-  if (!rows || rows.length === 0) {
-    throw new Error('برگهٔ اول فایل اکسل خالی است.');
-  }
-
-  await buildImportPreview(rows, fileName);
+  notify(`ورود تمام شد: ${fmt(added)} جدید، ${fmt(updated)} به‌روزرسانی، ${fmt(skipped)} بدون تغییر، ${fmt(errors)} نامعتبر.`);
 }
 
 $('importFile').onchange = async e => {
@@ -2001,6 +1973,8 @@ $('importFile').onchange = async e => {
   if (!file) return;
 
   try {
+    let rows;
+
     if (/\.csv$|\.txt$/i.test(file.name)) {
       const text = await new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -2011,73 +1985,67 @@ $('importFile').onchange = async e => {
         reader.readAsText(file, 'UTF-8');
       });
 
-      await buildImportPreview(parseCSV(text), file.name);
+      rows = parseCSV(text);
 
     } else if (/\.xlsx$|\.xls$/i.test(file.name)) {
+      notify('در حال آماده‌سازی فایل اکسل...');
+
+      if (!window.XLSX) {
+        await loadScript(
+          'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
+        );
+      }
+
+      if (!window.XLSX) {
+        throw new Error('کتابخانهٔ اکسل بارگذاری نشد.');
+      }
+
       const buffer = await new Promise((resolve, reject) => {
         const reader = new FileReader();
+
         reader.onload = () => resolve(reader.result);
         reader.onerror = () => reject(
           new Error('خواندن فایل اکسل ناموفق بود.')
         );
+
         reader.readAsArrayBuffer(file);
       });
 
-      await importExcelBuffer(buffer, file.name);
+      notify('در حال خواندن اطلاعات اکسل...');
+
+      const workbook = window.XLSX.read(buffer, {
+        type: 'array'
+      });
+
+      if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+        throw new Error('این فایل برگهٔ قابل‌خواندن ندارد.');
+      }
+
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+
+      rows = window.XLSX.utils.sheet_to_json(firstSheet, {
+        header: 1,
+        defval: ''
+      });
+
+      if (!rows || rows.length === 0) {
+        throw new Error('برگهٔ اول فایل اکسل خالی است.');
+      }
 
     } else {
       throw new Error('فقط فایل‌های XLSX، XLS، CSV و TXT پشتیبانی می‌شوند.');
     }
+
+    await buildImportPreview(rows, file.name);
+
   } catch (err) {
     console.error('Excel import error:', err);
-    notify('خطا در ورود فایل: ' +
-      (err && err.message ? err.message : 'خطای ناشناخته'));
+    notify(
+      'خطا در ورود فایل: ' +
+      (err && err.message ? err.message : 'خطای ناشناخته')
+    );
   } finally {
     e.target.value = '';
-  }
-};
-
-// Fallback for the rare case where Android recreates the Activity while
-// the system file picker is open and the original WebView callback is lost.
-window.__checkNativeSelectedFile = async function() {
-  const bridge = window.AndroidFileBridge;
-  if (!bridge || !bridge.hasPendingFile()) return;
-
-  try {
-    const size = bridge.getPendingFileSize();
-    const name = bridge.getPendingFileName() || 'import.xlsx';
-    if (!size) return;
-
-    notify('در حال بازیابی فایل انتخاب‌شده...');
-    const chunkSize = 48 * 1024;
-    const chunks = [];
-
-    for (let offset = 0; offset < size; offset += chunkSize) {
-      const encoded = bridge.readPendingFileChunk(offset, chunkSize);
-      if (!encoded) throw new Error('بازیابی بخشی از فایل ناموفق بود.');
-
-      const binary = atob(encoded);
-      const chunk = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        chunk[i] = binary.charCodeAt(i);
-      }
-      chunks.push(chunk);
-    }
-
-    const bytes = new Uint8Array(size);
-    let offset = 0;
-    for (const chunk of chunks) {
-      bytes.set(chunk, offset);
-      offset += chunk.length;
-    }
-
-    bridge.clearPendingFile();
-    await importExcelBuffer(bytes.buffer, name);
-  } catch (err) {
-    console.error('Native file recovery error:', err);
-    try { bridge.clearPendingFile(); } catch (_) {}
-    notify('بازیابی فایل ناموفق بود: ' +
-      (err && err.message ? err.message : 'خطای ناشناخته'));
   }
 };
 
