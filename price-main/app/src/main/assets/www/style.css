@@ -1,4 +1,3 @@
-
 /* =====================================================
    YADAK PRICE — NAVY & GOLD
    استایل یکپارچه یدک‌پرایس
@@ -22,834 +21,176 @@
   color-scheme: dark;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  min-height: 100%;
-  margin: 0;
-}
-
+* { box-sizing: border-box; }
+html, body { min-height: 100%; margin: 0; }
 body {
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  background:
-    radial-gradient(ellipse at 50% -10%, #152b43 0%, transparent 55%),
-    var(--bg);
+  background: radial-gradient(ellipse at 50% -10%, #152b43 0%, transparent 55%), var(--bg);
   color: var(--ink);
   font-family: inherit;
 }
-
-h1, h2, h3, p {
-  margin-top: 0;
-}
-
-p {
-  margin-bottom: 0;
-  color: var(--muted);
-  font-size: .9rem;
-}
-
-button,
-input,
-select,
-textarea {
-  font-family: inherit;
-}
-
-button {
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-.hidden {
-  display: none !important;
-}
-
-/* سربرگ */
-.top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px;
-  color: #fff;
-  background: linear-gradient(120deg, #030812, #12263a);
-  border-bottom: 1px solid #66541a;
-  box-shadow: var(--shadow);
-}
-
-.top h1 {
-  margin: 0;
-  font-size: 1.3rem;
-  font-weight: 900;
-}
-
-.top .eyebrow {
-  color: var(--primary);
-  font-size: .75rem;
-  font-weight: 800;
-}
-
-.top p {
-  margin-top: 4px;
-  color: #c2cede;
-  font-size: .8rem;
-}
+h1, h2, h3, p { margin-top: 0; }
+p { margin-bottom: 0; color: var(--muted); font-size: .9rem; }
+button, input, select, textarea { font-family: inherit; }
+button { cursor: pointer; touch-action: manipulation; }
+.hidden { display: none !important; }
 
 /* چیدمان اصلی */
 main {
-  width: 100%;
-  max-width: 820px;
-  margin: 0 auto;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  width: 100%; max-width: 820px; margin: 0 auto;
+  padding: 14px; display: flex; flex-direction: column; gap: 14px;
 }
 
-.card,
-.product-card,
-.list-row,
-.tool-card {
+.card, .product-card, .list-row, .tool-card {
   color: var(--ink);
   background: linear-gradient(145deg, #102034, #091522);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
-
-.card {
-  padding: 16px;
-}
-
-.section-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-}
+.card { padding: 16px; }
+.section-head { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 
 /* جست‌وجو */
-.search-panel .search-line {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.search-panel .search-line { display: flex; align-items: center; gap: 8px; }
+.search-panel input[type="text"], .search-panel #search, #search {
+  flex: 1; min-width: 0; padding: 12px 14px;
+  color: var(--ink); background: #071321;
+  border: 1px solid #344960; border-radius: 11px; font-size: 1rem;
 }
-
-.search-panel input[type="text"],
-.search-panel #search,
-#search {
-  flex: 1;
-  min-width: 0;
-  padding: 12px 14px;
-  color: var(--ink);
-  background: #071321;
-  border: 1px solid #344960;
-  border-radius: 11px;
-  font-size: 1rem;
+#search:focus, .search-panel input:focus, input:focus, select:focus, textarea:focus {
+  outline: 2px solid #ffc40055; border-color: var(--primary);
 }
-
-#search:focus,
-.search-panel input:focus,
-input:focus,
-select:focus,
-textarea:focus {
-  outline: 2px solid #ffc40055;
-  border-color: var(--primary);
-}
-
 .icon-btn {
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: #142438;
-  color: var(--primary);
-  font-size: 1.1rem;
+  width: 44px; height: 44px; border: 1px solid var(--line);
+  border-radius: 10px; background: #142438; color: var(--primary); font-size: 1.1rem;
 }
-
-.quick-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: .78rem;
+.quick-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; color: var(--muted); font-size: .78rem; }
+.filter-line { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.filter-line select, .filter-line input {
+  max-width: 100%; padding: 8px 10px; color: var(--ink);
+  background: #0b1929; border: 1px solid var(--line);
+  border-radius: 8px; font-size: .85rem;
 }
-
-.filter-line {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.filter-line select,
-.filter-line input {
-  max-width: 100%;
-  padding: 8px 10px;
-  color: var(--ink);
-  background: #0b1929;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  font-size: .85rem;
-}
-
-.filter-line .chk {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--muted);
-  font-size: .82rem;
-}
+.filter-line .chk { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: .82rem; }
 
 /* دکمه‌ها */
-.primary,
-.ghost,
-.small-btn {
-  border-radius: 10px;
-  font-size: .9rem;
-  transition: transform .15s, background .15s;
-}
+.primary, .ghost, .small-btn { border-radius: 10px; font-size: .9rem; transition: transform .15s, background .15s; }
+.primary { padding: 10px 16px; color: #111827; background: linear-gradient(135deg, #ffdc51, #ffc000); border: 0; font-weight: 800; }
+.ghost { padding: 9px 14px; color: var(--ink); background: #142438; border: 1px solid var(--line); }
+.ghost.small { padding: 6px 10px; font-size: .78rem; }
+.ghost.full { width: 100%; }
+.small-btn { padding: 6px 10px; color: var(--ink); background: #142438; border: 1px solid var(--line); font-size: .78rem; }
+button:active { transform: scale(.98); }
 
-.primary {
-  padding: 10px 16px;
-  color: #111827;
-  background: linear-gradient(135deg, #ffdc51, #ffc000);
-  border: 0;
-  font-weight: 800;
-}
+/* تب‌ها */
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 3px; }
+.tab { flex: 0 0 auto; padding: 9px 16px; color: #c1cede; background: #102034; border: 1px solid var(--line); border-radius: 999px; font-size: .88rem; }
+.tab.active { color: #111827; background: var(--primary); border-color: var(--primary); font-weight: 800; }
+.pane { display: none; flex-direction: column; gap: 12px; }
+.pane.active { display: flex; }
 
-.ghost {
-  padding: 9px 14px;
-  color: var(--ink);
-  background: #142438;
-  border: 1px solid var(--line);
-}
-
-.ghost.small {
-  padding: 6px 10px;
-  font-size: .78rem;
-}
-
-.ghost.full {
-  width: 100%;
-}
-
-.small-btn {
-  padding: 6px 10px;
-  color: var(--ink);
-  background: #142438;
-  border: 1px solid var(--line);
-  font-size: .78rem;
-}
-
-button:active {
-  transform: scale(.98);
-}
-
-/* تب‌ها و صفحات داخلی */
-.tabs {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 3px;
-}
-
-.tab {
-  flex: 0 0 auto;
-  padding: 9px 16px;
-  color: #c1cede;
-  background: #102034;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: .88rem;
-}
-
-.tab.active {
-  color: #111827;
-  background: var(--primary);
-  border-color: var(--primary);
-  font-weight: 800;
-}
-
-.pane {
-  display: none;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.pane.active {
-  display: flex;
-}
-
-/* کالاها و قیمت‌ها */
-.product-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.product-card {
-  padding: 13px;
-  overflow: hidden;
-}
-
-.product-title {
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1.8;
-  overflow-wrap: anywhere;
-}
-
-.product-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
-  color: var(--muted);
-  line-height: 1.8;
-  overflow-wrap: anywhere;
-}
-
-.pill {
-  padding: 3px 9px;
-  color: #e0eaff;
-  background: #1a3048;
-  border-radius: 999px;
-  font-size: .72rem;
-}
-
-.pill.final {
-  color: #8bf0c7;
-  background: #103b30;
-}
-
-.pill.manual {
-  color: #ffd69a;
-  background: #392b19;
-}
-
-.pill.warn {
-  color: #ffbec5;
-  background: #421f2a;
-}
-
-.price-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.price {
-  color: var(--primary);
-  font-size: 1.15rem;
-  font-weight: 900;
-  line-height: 1.7;
-  overflow-wrap: anywhere;
-}
-
-.price small {
-  color: var(--muted);
-  font-size: .65rem;
-  font-weight: 400;
-}
-
-.subprice {
-  color: var(--muted);
-  font-size: .75rem;
-  line-height: 1.8;
-  overflow-wrap: anywhere;
-}
-
-.price-row > .pill {
-  max-width: 48%;
-  white-space: normal;
-}
-
-.card-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.empty {
-  padding: 30px 10px;
-  color: var(--muted);
-  text-align: center;
-  font-size: .88rem;
-}
+/* کالاها */
+.product-list { display: flex; flex-direction: column; gap: 10px; }
+.product-card { padding: 13px; overflow: hidden; }
+.product-title { color: #fff; font-size: 1rem; font-weight: 800; line-height: 1.8; overflow-wrap: anywhere; }
+.product-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; color: var(--muted); line-height: 1.8; }
+.pill { padding: 3px 9px; color: #e0eaff; background: #1a3048; border-radius: 999px; font-size: .72rem; }
+.pill.final { color: #8bf0c7; background: #103b30; }
+.pill.manual { color: #ffd69a; background: #392b19; }
+.price-row { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.price { color: var(--primary); font-size: 1.15rem; font-weight: 900; line-height: 1.7; }
+.price small { color: var(--muted); font-size: .65rem; }
+.subprice { color: var(--muted); font-size: .75rem; }
+.card-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.empty { padding: 30px 10px; color: var(--muted); text-align: center; font-size: .88rem; }
 
 /* فرم‌ها */
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.form-grid label, .modal-form label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: .82rem; }
+.form-grid input, .form-grid select, .form-grid textarea, .modal-form input, .modal-form select, .modal-form textarea {
+  width: 100%; padding: 10px; color: var(--ink); background: #081523; border: 1px solid var(--line); border-radius: 9px; font-size: .92rem;
 }
+.stack { display: flex; flex-direction: column; gap: 8px; }
+.list-row { padding: 10px 12px; font-size: .84rem; line-height: 1.8; }
+.list-row small { display: block; margin: 2px 0; color: var(--muted); }
 
-.form-grid label,
-.modal-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  color: var(--muted);
-  font-size: .82rem;
-}
+/* ابزارها */
+.tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tool-card { position: relative; display: flex; flex-direction: column; gap: 7px; min-height: 100px; padding: 14px; text-align: right; cursor: pointer; }
+.tool-card input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.tool-icon { color: var(--primary); font-size: 1.4rem; }
+.tool-card small, .note { color: var(--muted); font-size: .82rem; }
+.note { line-height: 1.8; }
 
-.form-grid input,
-.form-grid select,
-.form-grid textarea,
-.modal-form input,
-.modal-form select,
-.modal-form textarea {
-  width: 100%;
-  max-width: 100%;
-  padding: 10px;
-  color: var(--ink);
-  background: #081523;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  font-size: .92rem;
-}
+/* مودال */
+.backdrop { position: fixed; z-index: 1050; inset: 0; display: flex; align-items: flex-end; justify-content: center; background: #000b; }
+.backdrop.hidden { display: none !important; }
+.modal { width: 100%; max-width: 520px; max-height: 88dvh; overflow: auto; padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); color: var(--ink); background: #0d1a2a; border: 1px solid var(--line); border-radius: 18px 18px 0 0; }
+.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.modal-form { display: flex; flex-direction: column; gap: 10px; }
+.modal-form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modal-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.import-preview-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: .78rem; }
+.import-preview-table th, .import-preview-table td { padding: 5px 7px; text-align: right; border: 1px solid var(--line); }
+.import-preview-table th { background: #17283b; }
+.import-preview-table tr.row-new td { background: #103b30; }
+.import-preview-table tr.row-updated td { background: #172e49; }
+.import-preview-table tr.row-skip td { color: var(--muted); background: #101d2c; }
+.import-preview-table tr.row-error td { background: #421f2a; }
 
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.list-row {
-  padding: 10px 12px;
-  font-size: .84rem;
-  line-height: 1.8;
-}
-
-.list-row small {
-  display: block;
-  margin: 2px 0;
-  color: var(--muted);
-}
-
-/* ابزارها و ورود فایل */
-.tool-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.tool-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  min-width: 0;
-  min-height: 100px;
-  padding: 14px;
-  text-align: right;
-  cursor: pointer;
-}
-
-.tool-card input[type="file"] {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.tool-icon {
-  color: var(--primary);
-  font-size: 1.4rem;
-}
-
-.tool-card small,
-.note {
-  color: var(--muted);
-  font-size: .82rem;
-}
-
-.note {
-  line-height: 1.8;
-}
-
-/* پنجره‌های بازشو */
-.backdrop {
-  position: fixed;
-  z-index: 1050;
-  inset: 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  background: #000b;
-}
-
-.backdrop.hidden {
-  display: none !important;
-}
-
-.modal {
-  width: 100%;
-  max-width: 520px;
-  max-height: 88dvh;
-  overflow: auto;
-  padding: 16px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-  color: var(--ink);
-  background: #0d1a2a;
-  border: 1px solid var(--line);
-  border-radius: 18px 18px 0 0;
-}
-
-.modal-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--line);
-}
-
-.modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.modal-form .two {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.modal-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-/* جدول پیش‌نمایش واردات */
-.import-preview-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 8px;
-  font-size: .78rem;
-}
-
-.import-preview-table th,
-.import-preview-table td {
-  padding: 5px 7px;
-  text-align: right;
-  border: 1px solid var(--line);
-}
-
-.import-preview-table th {
-  background: #17283b;
-}
-
-.import-preview-table tr.row-new td {
-  background: #103b30;
-}
-
-.import-preview-table tr.row-updated td {
-  background: #172e49;
-}
-
-.import-preview-table tr.row-skip td {
-  color: var(--muted);
-  background: #101d2c;
-}
-
-.import-preview-table tr.row-error td {
-  background: #421f2a;
-}
-
-.import-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 8px 0;
-}
-
-.import-summary span {
-  padding: 4px 10px;
-  color: var(--ink);
-  background: #1a3048;
-  border-radius: 999px;
-  font-size: .75rem;
-}
-
-.map-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin: 8px 0;
-}
-
-.map-grid label {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  color: var(--muted);
-  font-size: .76rem;
-}
-
-/* پیام موقت */
+/* توست و پیام‌ها */
 .toast {
-  position: fixed;
-  z-index: 2000;
-  bottom: 18px;
-  left: 50%;
-  max-width: 90vw;
-  padding: 10px 18px;
-  color: #111827;
-  background: var(--primary);
-  border-radius: 999px;
-  box-shadow: var(--shadow);
-  font-size: .85rem;
-  font-weight: 800;
-  text-align: center;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(-50%) translateY(20px);
-  transition: .25s;
+  position: fixed; z-index: 2000; bottom: 18px; left: 50%; max-width: 90vw; padding: 10px 18px;
+  color: #111827; background: var(--primary); border-radius: 999px; box-shadow: var(--shadow);
+  font-size: .85rem; font-weight: 800; text-align: center; opacity: 0; pointer-events: none;
+  transform: translateX(-50%) translateY(20px); transition: .25s;
 }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+footer { padding: 20px 10px 10px; color: var(--muted); text-align: center; font-size: .72rem; }
 
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+/* تنظیمات ظاهر انتخابی */
+:root[data-density="compact"] .product-card { padding: 8px 10px; }
+:root[data-density="compact"] .product-list { gap: 6px; }
+:root[data-density="spacious"] .product-card { padding: 18px 16px; }
+:root[data-density="spacious"] .product-title { font-size: 1.12em; line-height: 1.9; }
+:root[data-density="spacious"] .price { font-size: 1.3em; }
 
-footer {
-  padding: 20px 10px 10px;
-  color: var(--muted);
-  text-align: center;
-  font-size: .72rem;
-}
-
-/* صفحه‌های داخلی: خودرو و داشبورد تبلیغاتی پنهان */
-body.home-view > .brand-showcase,
-body:not(.home-view) .car-hero,
-body:not(.home-view) .brand-showcase {
-  display: none !important;
-}
-
-/* تراکم کالاها */
-:root[data-density="compact"] .product-card {
-  padding: 8px 10px;
-}
-
-:root[data-density="compact"] .product-list {
-  gap: 6px;
-}
-
-:root[data-density="comfortable"] .product-card {
-  padding: 14px;
-}
-
-:root[data-density="spacious"] .product-card {
-  padding: 18px 16px;
-}
-
-:root[data-density="spacious"] .product-title {
-  font-size: 1.12em;
-  line-height: 1.9;
-}
-
-:root[data-density="spacious"] .price {
-  font-size: 1.3em;
-}
-
-/* اندازه فونت انتخابی */
 :root[data-font-size="small"] { font-size: 14px; }
 :root[data-font-size="normal"] { font-size: 16px; }
 :root[data-font-size="large"] { font-size: 18px; }
 :root[data-font-size="xlarge"] { font-size: 20px; }
 
-:root[data-font-family="system"] {
-  font-family: system-ui, "Segoe UI", Tahoma, sans-serif;
-}
-
-:root[data-font-family="vazir"] {
-  font-family: "Vazirmatn", Tahoma, sans-serif;
-}
-
-:root[data-font-family="tahoma"] {
-  font-family: Tahoma, sans-serif;
-}
-
-:root[data-font-family="arial"] {
-  font-family: Arial, Tahoma, sans-serif;
-}
-
-/* رنگ انتخابی تنظیمات */
 :root[data-color="blue"] { --primary: #60a5fa; }
 :root[data-color="green"] { --primary: #34d399; }
 :root[data-color="purple"] { --primary: #c4b5fd; }
 :root[data-color="orange"] { --primary: #fdba74; }
 
-/* تم روشن؛ تنظیمات انتخابی برنامه حفظ شود */
-:root[data-theme="light"] {
-  color-scheme: light;
-  --bg: #f3f5f8;
-  --card: #fff;
-  --ink: #142033;
-  --muted: #64748b;
-  --line: #dce4ee;
-  --primary-ink: #111827;
-}
-
-:root[data-theme="light"] body {
-  background: var(--bg);
-  color: var(--ink);
-}
-
-:root[data-theme="light"] .card,
-:root[data-theme="light"] .product-card,
-:root[data-theme="light"] .list-row,
-:root[data-theme="light"] .tool-card {
-  color: var(--ink);
-  background: #fff;
-  border-color: var(--line);
-}
-
-:root[data-theme="light"] .product-title {
-  color: var(--ink);
-}
-
-:root[data-theme="light"] .search-panel input,
-:root[data-theme="light"] #search,
-:root[data-theme="light"] .filter-line select,
-:root[data-theme="light"] .filter-line input,
-:root[data-theme="light"] .form-grid input,
-:root[data-theme="light"] .form-grid select,
-:root[data-theme="light"] .form-grid textarea,
-:root[data-theme="light"] .modal-form input,
-:root[data-theme="light"] .modal-form select,
-:root[data-theme="light"] .modal-form textarea {
-  color: var(--ink);
-  background: #fff;
-}
-
-:root[data-theme="light"] .modal {
-  color: var(--ink);
-  background: #fff;
-}
-
-:root[data-theme="light"] .icon-btn,
-:root[data-theme="light"] .ghost,
-:root[data-theme="light"] .small-btn,
-:root[data-theme="light"] .tab {
-  color: var(--ink);
-  background: #fff;
-  border-color: var(--line);
-}
-
-:root[data-theme="light"] .tab.active {
-  color: #111827;
-  background: var(--primary);
-  border-color: var(--primary);
-}
-
-/* موبایل */
+/* واکنش‌گرا */
 @media (max-width: 420px) {
-  main {
-    padding: 10px;
-    gap: 11px;
-  }
-
-  .card {
-    padding: 13px;
-  }
-
-  .tool-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-form .two,
-  .map-grid {
-    grid-template-columns: 1fr;
-  }
-
-  body.home-view .car-hero {
-    min-height: 48dvh;
-  }
-
-  body.home-view .car-hero img,
-  body.home-view .car-hero svg {
-    max-height: 43dvh;
-  }
+  main { padding: 10px; gap: 11px; }
+  .card { padding: 13px; }
+  .tool-grid, .modal-form .two { grid-template-columns: 1fr; }
 }
-
 @media (min-width: 700px) {
-  main {
-    padding: 20px;
-  }
-
-  .product-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-  }
-
-  .tool-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-/* تصویر تمام‌صفحه ماشین در صفحه خانه */
-body.home-view {
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  background: #05070d !important;
+  main { padding: 20px; }
+  .product-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  .tool-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
-body.home-view > main > .car-hero {
-  position: fixed !important;
-  inset: 0 !important;
-  width: 100vw !important;
-  height: 100dvh !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  max-width: none !important;
-  border-radius: 0 !important;
-  overflow: hidden !important;
-  z-index: 1 !important;
-}
-
-body.home-view .car-hero img {
-  position: absolute !important;
-  inset: 0 !important;
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  max-width: none !important;
-  max-height: none !important;
-  object-fit: cover !important;
-  object-position: center !important;
-}
-/* یدک‌پرایس: تم یکپارچه جدید؛ این بخش جایگزین وصله‌های قدیمی صفحه خانه می‌شود */
+/* =====================================================
+   تنظیمات صفحه اصلی (Home View) و ماشین
+===================================================== */
 :root { --primary:#ffc400; --accent:#ffcf18; }
-body.home-view { background:#030811 !important; color:#f4f7fb; }
-body.home-view > header.top, body.home-view > footer,
-body.home-view > main > :not(.car-hero):not(.search-panel) { display:none !important; }
+body.home-view { background:#030811 !important; color:#f4f7fb; overflow: hidden !important; margin: 0 !important; padding: 0 !important;}
+body.home-view > header.top, body.home-view > footer, body.home-view .hidden-on-home { display:none !important; }
+body:not(.home-view) .car-hero { display:none !important; }
+
 body.home-view > main { display:block !important; width:100%; max-width:none; min-height:100dvh; margin:0; padding:0; }
 body.home-view > main > .car-hero {
   position:fixed !important; inset:0 !important; z-index:1 !important;
   display:block !important; width:100vw !important; height:100dvh !important;
-  min-height:100dvh !important; max-width:none !important; margin:0 !important; padding:0 !important;
-  overflow:hidden !important; border:0 !important; border-radius:0 !important; box-shadow:none !important;
   background:radial-gradient(ellipse at 50% 53%,#10304a 0%,#061421 40%,#02050b 78%) !important;
 }
 body.home-view .car-hero::before {
@@ -860,19 +201,22 @@ body.home-view .car-hero::before {
 }
 body.home-view .car-hero img {
   position:absolute !important; z-index:1; left:0; right:0; top:34% !important;
-  width:100% !important; height:42% !important; max-width:none !important; max-height:none !important;
-  object-fit:cover !important; object-position:center 55% !important; opacity:.88;
-  -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 12%,#000 75%,transparent 100%);
-  mask-image:linear-gradient(to bottom,transparent 0%,#000 12%,#000 75%,transparent 100%);
+  width:100% !important; height:42% !important; object-fit:cover !important;
+  opacity:.88; -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 12%,#000 75%,transparent 100%);
   filter:contrast(1.12) saturate(.82) drop-shadow(0 10px 22px #000);
 }
+
 .hero-brand { position:absolute; z-index:2; top:10%; left:10px; right:10px; text-align:center; color:#fff; }
-.hero-logo { position:relative; display:inline-grid; place-items:center; width:78px; height:78px; color:#ffca05; font-size:66px; line-height:1; filter:drop-shadow(0 0 13px #e4a90055); }
-.hero-logo span { position:absolute; color:#fff; font-size:36px; transform:rotate(-10deg); }
-.hero-wordmark { margin-top:0; font-size:clamp(2rem,9vw,3.1rem); font-weight:950; letter-spacing:-1px; text-shadow:0 3px 18px #000; }
+.hero-logo-image { 
+  display: block; width: 140px; height: auto; margin: 0 auto 5px; 
+  filter: drop-shadow(0 0 15px rgba(255,196,0,0.4)); 
+}
+.hero-wordmark { margin-top:0; font-size:clamp(2rem,9vw,3.1rem); font-weight:950; text-shadow:0 3px 18px #000; }
 .hero-wordmark b { color:#ffc400; }
 .hero-tagline { margin-top:7px; font-size:clamp(.9rem,3.8vw,1.25rem); font-weight:700; color:#f4f6fb; }
 .hero-bottom-lines { position:absolute; z-index:2; bottom:0; left:0; right:0; height:12px; pointer-events:none; background:linear-gradient(135deg,transparent 0 8%,#ffc400 8% 10%,transparent 10% 90%,#ffc400 90% 92%,transparent 92%); }
+
+/* نوار جستجوی صفحه اصلی */
 body.home-view .search-panel {
   display:block !important; position:fixed !important; z-index:5 !important;
   left:5% !important; right:5% !important; bottom:calc(16% + env(safe-area-inset-bottom,0px)) !important;
@@ -881,152 +225,51 @@ body.home-view .search-panel {
   border-radius:999px !important; box-shadow:0 0 22px #ffc40020, inset 0 0 18px #1b456522 !important;
 }
 body.home-view .search-panel .search-line { display:flex !important; align-items:center; gap:6px !important; }
-body.home-view #search { display:block !important; flex:1 1 auto; min-width:0; width:100%; min-height:48px; padding:10px 12px; color:#fff; border:0 !important; outline:none; background:transparent !important; text-align:right; font-size:.92rem; }
+body.home-view #search { display:block !important; flex:1 1 auto; min-height:48px; padding:10px 12px; color:#fff !important; border:0 !important; background:transparent !important; text-align:right; font-size:1rem; }
 body.home-view #search::placeholder { color:#aab4c2; }
 body.home-view #voiceBtn { display:grid !important; flex:0 0 46px; width:46px; height:46px; place-items:center; color:#101820; background:#ffc400; border:0; border-radius:50%; font-size:21px; }
-body.home-view #scanBarcodeBtn, body.home-view #scanTextBtn, body.home-view #clearSearch,
-body.home-view .filter-line, body.home-view .quick-stats { display:none !important; }
-#menuToggle { z-index:1201 !important; top:calc(18px + env(safe-area-inset-top,0px)); right:16px; color:#ffc400; background:rgba(2,9,17,.72); border:1px solid #ffc40066; border-radius:12px; }
-#menuShade { z-index:1200; background:rgba(0,0,0,.68); backdrop-filter:blur(3px); }
-#sideMenu { z-index:1202; width:min(350px,88vw); padding:12px 14px 28px; background:linear-gradient(160deg,#071727,#020811 80%); border-left:2px solid #ffc400; }
-.menu-brand { display:flex; justify-content:flex-start; gap:10px; position:relative; padding:15px 2px 18px; margin-bottom:10px; border-bottom:1px solid #263b50; font-size:22px; }
+body.home-view #scanBarcodeBtn, body.home-view #scanTextBtn, body.home-view #clearSearch, body.home-view .quick-stats { display:none !important; }
+
+/* =====================================================
+   منوی کشویی (Sidebar Drawer)
+===================================================== */
+#menuToggle.menu-toggle {
+  display: flex !important; position: fixed !important; align-items: center !important; justify-content: center !important;
+  width: 58px !important; height: 58px !important; left: 18px !important; bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+  color: #ffc400 !important; background: rgba(2, 9, 17, .96) !important; border: 2px solid #ffc400 !important;
+  border-radius: 50% !important; font-size: 32px !important; line-height: 1 !important;
+  box-shadow: 0 0 18px rgba(255,196,0,.18) !important; z-index: 2147483002 !important; cursor: pointer;
+}
+#menuShade {
+  display: block !important; position: fixed !important; inset: 0 !important; z-index: 2147483000 !important;
+  background: rgba(0, 0, 0, .68) !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;
+  transition: opacity .22s ease, visibility .22s ease !important;
+}
+#menuShade.open { opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; }
+#sideMenu {
+  display: flex !important; flex-direction: column !important; position: fixed !important; top: 0 !important; right: 0 !important; bottom: 0 !important;
+  width: min(350px, 88vw) !important; max-width: 100vw !important; height: 100dvh !important;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 14px calc(28px + env(safe-area-inset-bottom, 0px)) !important;
+  overflow-x: hidden !important; overflow-y: auto !important;
+  background: linear-gradient(160deg, #071727, #020811 80%) !important; border-left: 2px solid #ffc400 !important;
+  box-shadow: -16px 0 40px rgba(0,0,0,.38) !important; z-index: 2147483001 !important;
+  transform: translateX(105%) !important; visibility: hidden !important; pointer-events: none !important;
+  transition: transform .24s ease, visibility .24s ease !important;
+}
+#sideMenu.open { transform: translateX(0) !important; visibility: visible !important; pointer-events: auto !important; }
+
+.menu-brand { display:flex; justify-content:flex-start; gap:10px; padding:15px 2px 18px; margin-bottom:10px; border-bottom:1px solid #263b50; font-size:22px; }
 .menu-brand strong { flex:1; }
 .menu-brand span { color:#ffc400; }
-.menu-logo { display:grid; place-items:center; width:45px; height:45px; border:3px solid #ffc400; border-radius:50%; color:#ffc400; font-size:30px; }
-.menu-brand button { order:3; padding:4px 8px; color:#dbe4ef; }
+.menu-logo { width:48px; height:48px; object-fit:contain; }
+#menuClose { position:relative; min-width:44px; min-height:44px; color:#fff; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); border-radius:8px; font-size:25px; cursor:pointer; }
 #sideMenu > button { display:flex; align-items:center; gap:14px; min-height:52px; margin:2px 0; padding:10px 12px; color:#eef3fa; background:transparent; border:0; border-bottom:1px solid rgba(83,112,140,.18); border-radius:8px; text-align:right; font-size:.92rem; }
 #sideMenu > button .menu-icon { display:inline-grid; place-items:center; flex:0 0 34px; color:#ffc400; font-size:27px; font-weight:800; }
 #sideMenu > button .menu-arrow { margin-right:auto; color:#8fa1b8; font-size:27px; }
 #sideMenu > button:first-of-type { color:#111827; background:#ffc400; font-weight:900; }
 #sideMenu > button:first-of-type .menu-icon, #sideMenu > button:first-of-type .menu-arrow { color:#111827; }
-#sideMenu > button:active, #sideMenu > button:focus-visible { color:#111827; background:#ffc400; }
-.menu-support { display:flex; align-items:center; gap:12px; margin-top:16px; padding:15px 10px; color:#f6f8fb; border:0; border-top:1px solid #536b82; border-radius:0; text-align:right; }
+.menu-support { display:flex; align-items:center; gap:12px; margin-top:16px; padding:15px 10px; color:#f6f8fb; border-top:1px solid #536b82; }
 .menu-support .menu-icon { color:#ffc400; font-size:28px; }
 .menu-support div { display:flex; flex-direction:column; gap:4px; }
 .menu-support small { color:#9eafc2; font-size:.75rem; }
-@media (max-height:700px) {
- .hero-brand { top:7%; }
- .hero-logo { width:56px; height:56px; font-size:50px; }
- .hero-logo span { font-size:28px; }
- body.home-view .car-hero img { top:30% !important; height:47% !important; }
- body.home-view .search-panel { bottom:calc(11% + env(safe-area-inset-bottom,0px)) !important; }
-}
-.hero-logo-image { display:block; width:94px; height:78px; object-fit:contain; margin:0 auto 2px; filter:drop-shadow(0 0 12px #ffc40044); }
-.menu-logo { width:48px; height:48px; object-fit:contain; border:0; border-radius:0; }
-
-/* Critical fix: keep the drawer trigger visible above the home screen */
-#menuToggle.menu-toggle {
-  display: flex !important;
-  position: fixed !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 58px !important;
-  height: 58px !important;
-  left: 18px !important;
-  right: auto !important;
-  bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
-  top: auto !important;
-  padding: 0 !important;
-  color: #ffc400 !important;
-  background: rgba(2, 9, 17, .94) !important;
-  border: 2px solid #ffc400 !important;
-  border-radius: 50% !important;
-  font-size: 32px !important;
-  line-height: 1 !important;
-  box-shadow: 0 0 18px rgba(255,196,0,.18) !important;
-  z-index: 2147483000 !important;
-}
-#menuShade { position: fixed !important; inset: 0 !important; }
-#sideMenu { position: fixed !important; top: 0 !important; bottom: 0 !important; right: 0 !important; overflow-y: auto !important; }
-
-/* Definitive drawer state rules: closed by default, visible only when .open is set. */
-#menuToggle.menu-toggle {
-  display: flex !important;
-  position: fixed !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 58px !important;
-  height: 58px !important;
-  left: 18px !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
-  padding: 0 !important;
-  color: #ffc400 !important;
-  background: rgba(2, 9, 17, .96) !important;
-  border: 2px solid #ffc400 !important;
-  border-radius: 50% !important;
-  font-size: 32px !important;
-  line-height: 1 !important;
-  box-shadow: 0 0 18px rgba(255,196,0,.18) !important;
-  z-index: 2147483002 !important;
-}
-#menuShade {
-  display: block !important;
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 2147483000 !important;
-  background: rgba(0, 0, 0, .68) !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  transition: opacity .22s ease, visibility .22s ease !important;
-}
-#menuShade.open {
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-}
-#sideMenu {
-  display: flex !important;
-  flex-direction: column !important;
-  position: fixed !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: min(350px, 88vw) !important;
-  max-width: 100vw !important;
-  height: 100dvh !important;
-  margin: 0 !important;
-  padding: calc(12px + env(safe-area-inset-top, 0px)) 14px calc(28px + env(safe-area-inset-bottom, 0px)) !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  overscroll-behavior: contain !important;
-  background: linear-gradient(160deg, #071727, #020811 80%) !important;
-  border-left: 2px solid #ffc400 !important;
-  box-shadow: -16px 0 40px rgba(0,0,0,.38) !important;
-  z-index: 2147483001 !important;
-  transform: translateX(105%) !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  transition: transform .24s ease, visibility .24s ease !important;
-}
-#sideMenu.open {
-  transform: translateX(0) !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-}
-#menuClose {
-  position: relative !important;
-  z-index: 2 !important;
-  flex: 0 0 auto !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 44px !important;
-  min-height: 44px !important;
-  color: #fff !important;
-  background: rgba(255,255,255,.12) !important;
-  border: 1px solid rgba(255,255,255,.18) !important;
-  border-radius: 8px !important;
-  font-size: 25px !important;
-  cursor: pointer !important;
-  pointer-events: auto !important;
-}
 body.menu-open { overflow: hidden !important; }
-@media (prefers-reduced-motion: reduce) {
-  #sideMenu, #menuShade { transition: none !important; }
-}
