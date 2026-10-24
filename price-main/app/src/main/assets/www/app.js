@@ -12,146 +12,13 @@ const $ = id => document.getElementById(id);
 const now = () => new Date().toLocaleString('fa-IR');
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM READY');
-
-  document.body.classList.remove('home-view');
-
-  const menuBtn = document.getElementById('menuToggle');
-  const sideMenu = document.getElementById('sideMenu');
-  const menuShade = document.getElementById('menuShade');
-
-  if (menuBtn) {
-    menuBtn.style.display = 'flex';
-    menuBtn.style.zIndex = '2147483647';
-    menuBtn.style.pointerEvents = 'auto';
-
-    menuBtn.onclick = () => {
-      console.log('MENU CLICKED');
-
-      if (sideMenu) {
-        sideMenu.classList.add('open');
-        sideMenu.style.transform = 'translateX(0)';
-        sideMenu.style.visibility = 'visible';
-        sideMenu.style.pointerEvents = 'auto';
-      }
-
-      if (menuShade) {
-        menuShade.classList.add('open');
-        menuShade.style.opacity = '1';
-        menuShade.style.visibility = 'visible';
-        menuShade.style.pointerEvents = 'auto';
-      }
-
-      document.body.classList.add('menu-open');
-    };
-  }
-
-  const closeBtn = document.getElementById('menuClose');
-  if (closeBtn) {
-    closeBtn.onclick = () => {
-      if (sideMenu) {
-        sideMenu.classList.remove('open');
-        sideMenu.style.transform = 'translateX(105%)';
-        sideMenu.style.visibility = 'hidden';
-        sideMenu.style.pointerEvents = 'none';
-      }
-
-      if (menuShade) {
-        menuShade.classList.remove('open');
-        menuShade.style.opacity = '0';
-        menuShade.style.visibility = 'hidden';
-        menuShade.style.pointerEvents = 'none';
-      }
-
-      document.body.classList.remove('menu-open');
-    };
-  }
-
-  if (menuShade) {
-    menuShade.onclick = () => {
-      if (sideMenu) {
-        sideMenu.classList.remove('open');
-        sideMenu.style.transform = 'translateX(105%)';
-        sideMenu.style.visibility = 'hidden';
-        sideMenu.style.pointerEvents = 'none';
-      }
-
-      menuShade.classList.remove('open');
-      menuShade.style.opacity = '0';
-      menuShade.style.visibility = 'hidden';
-      menuShade.style.pointerEvents = 'none';
-
-      document.body.classList.remove('menu-open');
-    };
-  }
-
-  document.querySelectorAll('#sideMenu [data-goto]').forEach(btn => {
-    btn.onclick = () => {
-      const target = btn.dataset.goto;
-
-      console.log('GO TO:', target);
-
-      if (target === 'home') {
-        document.body.classList.add('home-view');
-        return;
-      }
-
-      document.body.classList.remove('home-view');
-
-      if (target === 'search') {
-        document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'products'));
-        document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'products'));
-      }
-
-      if (target === 'products') {
-        document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'products'));
-        document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'products'));
-      }
-
-      if (target === 'rules') {
-        document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'rules'));
-        document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'rules'));
-      }
-
-      if (target === 'history') {
-        document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'history'));
-        document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'history'));
-      }
-
-      if (target === 'tools') {
-        document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'tools'));
-        document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'tools'));
-      }
-
-      if (sideMenu) {
-        sideMenu.classList.remove('open');
-        sideMenu.style.transform = 'translateX(105%)';
-        sideMenu.style.visibility = 'hidden';
-        sideMenu.style.pointerEvents = 'none';
-      }
-
-      if (menuShade) {
-        menuShade.classList.remove('open');
-        menuShade.style.opacity = '0';
-        menuShade.style.visibility = 'hidden';
-        menuShade.style.pointerEvents = 'none';
-      }
-
-      document.body.classList.remove('menu-open');
-    };
-  });
-
-  document.querySelectorAll('.tab').forEach(b => {
-    b.onclick = () => {
-      const tab = b.dataset.tab;
-      document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
-      document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === tab));
-    };
-  });
-
-  console.log('Menu logic initialized');
-});
+function debounce(fn, delay) {
+  let timer = null;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+}
 
 function norm(v) {
   return String(v ?? '')
@@ -192,28 +59,6 @@ function notify(s) {
   $('toast').classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => $('toast').classList.remove('show'), 3200);
-}
-
-function loadScript(src) {
-  return new Promise((res, rej) => {
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload = res;
-    s.onerror = () => rej(new Error('بارگذاری کتابخانه ناموفق بود؛ به اینترنت نیاز است.'));
-    document.head.appendChild(s);
-  });
-}
-
-function levenshtein(a, b, max) {
-  if (Math.abs(a.length - b.length) > max) return max + 1;
-  const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
-  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
-  for (let i = 1; i <= a.length; i++) {
-    for (let j = 1; j <= b.length; j++) {
-      dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j - 1], dp[i][j - 1], dp[i - 1][j]);
-    }
-  }
-  return dp[a.length][b.length];
 }
 
 function openDB() {
@@ -304,73 +149,16 @@ async function setting(key, def) {
   return x ? x.value : def;
 }
 
-async function getFiltered() {
-  const products = await all('products');
-  let rows = searchProducts(products, $('search') ? $('search').value : '');
-
-  const brand = $('filterBrand') ? $('filterBrand').value : '';
-  const source = $('filterSource') ? $('filterSource').value : '';
-  const ptype = $('filterPriceType') ? $('filterPriceType').value : '';
-  const minP = $('filterMinPrice') ? Number($('filterMinPrice').value || 0) : 0;
-  const maxP = $('filterMaxPrice') ? Number($('filterMaxPrice').value || 0) : 0;
-  const hasCode = $('filterHasCode') ? $('filterHasCode').checked : false;
-
-  if (brand) rows = rows.filter(p => p.brand === brand);
-  if (source) rows = rows.filter(p => p.source === source);
-  if (ptype) rows = rows.filter(p => (p.priceType || 'base') === ptype);
-  if (hasCode) rows = rows.filter(p => !!p.code);
-
-  const rules = await all('rules');
-  const defaultProfit = await setting('defaultProfit', 15);
-
-  let withPrice = rows.map(p => ({
-    p,
-    sell: sellPrice(p, rules, defaultProfit),
-    info: profitInfo(p, rules, defaultProfit)
-  }));
-
-  if (minP > 0) withPrice = withPrice.filter(x => x.sell >= minP);
-  if (maxP > 0) withPrice = withPrice.filter(x => x.sell <= maxP);
-
-  return withPrice;
-}
-
-function isFinalPrice(p) {
-  return p.priceType === 'final';
-}
-
-function matchedRule(p, rules) {
-  const name = norm(p.name), brand = norm(p.brand);
-  const matches = rules.filter(r => {
-    const termOk = !r.term || name.includes(norm(r.term));
-    const brandOk = !r.brand || brand.includes(norm(r.brand));
-    return (r.term || r.brand) && termOk && brandOk;
-  });
-
-  if (!matches.length) return null;
-  matches.sort((a, b) => (norm(b.term).length + norm(b.brand).length) - (norm(a.term).length + norm(a.brand).length));
-  return matches[0];
-}
-
-function profitInfo(p, rules, defaultProfit) {
-  if (isFinalPrice(p)) return { percent: 0, origin: 'final', label: 'قیمت نهایی · بدون سود' };
-
-  if (p.itemProfitPercent !== null && p.itemProfitPercent !== undefined && p.itemProfitPercent !== '') {
-    return { percent: Number(p.itemProfitPercent), origin: 'item', label: `سود اختصاصی ${fmt(Number(p.itemProfitPercent))}%` };
+function levenshtein(a, b, max) {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j - 1], dp[i][j - 1], dp[i - 1][j]);
+    }
   }
-
-  const rule = matchedRule(p, rules);
-
-  if (rule) {
-    return { percent: Number(rule.percent), origin: 'group', label: `قاعده (${[rule.term, rule.brand].filter(Boolean).join(' ')}) ${fmt(rule.percent)}٪` };
-  }
-
-  return { percent: Number(defaultProfit), origin: 'default', label: `سود پیش‌فرض ${fmt(defaultProfit)}٪` };
-}
-
-function sellPrice(p, rules, defaultProfit) {
-  if (isFinalPrice(p)) return Number(p.basePrice) || 0;
-  return Math.round((Number(p.basePrice) || 0) * (1 + profitInfo(p, rules, defaultProfit).percent / 100));
+  return dp[a.length][b.length];
 }
 
 function matchTier(p, qWords, qNorm) {
@@ -419,6 +207,101 @@ function searchProducts(products, query) {
 
   scored.sort((a, b) => a.tier - b.tier || norm(a.p.name).localeCompare(norm(b.p.name), 'fa'));
   return scored.map(x => x.p);
+}
+
+function isFinalPrice(p) {
+  return p.priceType === 'final';
+}
+
+function matchedRule(p, rules) {
+  const name = norm(p.name), brand = norm(p.brand);
+  const matches = rules.filter(r => {
+    const termOk = !r.term || name.includes(norm(r.term));
+    const brandOk = !r.brand || brand.includes(norm(r.brand));
+    return (r.term || r.brand) && termOk && brandOk;
+  });
+
+  if (!matches.length) return null;
+  matches.sort((a, b) => (norm(b.term).length + norm(b.brand).length) - (norm(a.term).length + norm(a.brand).length));
+  return matches[0];
+}
+
+function profitInfo(p, rules, defaultProfit) {
+  if (isFinalPrice(p)) return { percent: 0, origin: 'final', label: 'قیمت نهایی · بدون سود' };
+  if (p.itemProfitPercent !== null && p.itemProfitPercent !== undefined && p.itemProfitPercent !== '') {
+    return { percent: Number(p.itemProfitPercent), origin: 'item', label: `سود اختصاصی ${fmt(Number(p.itemProfitPercent))}%` };
+  }
+  const rule = matchedRule(p, rules);
+  if (rule) {
+    return { percent: Number(rule.percent), origin: 'group', label: `قاعده (${[rule.term, rule.brand].filter(Boolean).join(' ')}) ${fmt(rule.percent)}٪` };
+  }
+  return { percent: Number(defaultProfit), origin: 'default', label: `سود پیش‌فرض ${fmt(defaultProfit)}٪` };
+}
+
+function sellPrice(p, rules, defaultProfit) {
+  if (isFinalPrice(p)) return Number(p.basePrice) || 0;
+  return Math.round((Number(p.basePrice) || 0) * (1 + profitInfo(p, rules, defaultProfit).percent / 100));
+}
+
+async function renderHomeSearchResults() {
+  const input = document.getElementById('homeSearch');
+  const resultsBox = document.getElementById('homeSearchResults');
+
+  if (!input || !resultsBox) return;
+
+  const query = input.value.trim();
+  const products = await all('products');
+  const rules = await all('rules');
+  const defaultProfit = await setting('defaultProfit', 15);
+
+  let filtered = query ? searchProducts(products, query) : products.slice(0, 6);
+
+  if (!filtered.length) {
+    resultsBox.innerHTML = '<div class="empty-result">هیچ نتیجه‌ای پیدا نشد.</div>';
+    return;
+  }
+
+  filtered = filtered.slice(0, 8);
+
+  resultsBox.innerHTML = filtered.map(p => {
+    const price = sellPrice(p, rules, defaultProfit);
+    return `
+      <div class="search-result-card" data-id="${p.id}">
+        <div class="result-name">${esc(p.name)}</div>
+        <div class="result-meta">
+          ${p.brand ? `<span class="result-pill">${esc(p.brand)}</span>` : ''}
+          ${p.code ? `<span class="result-pill">${esc(p.code)}</span>` : ''}
+          ${p.oem ? `<span class="result-pill">OEM: ${esc(p.oem)}</span>` : ''}
+        </div>
+        <div class="result-price">${fmt(price)} ریال</div>
+      </div>
+    `;
+  }).join('');
+
+  resultsBox.querySelectorAll('.search-result-card').forEach(item => {
+    item.onclick = () => {
+      const id = item.dataset.id;
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+
+      const searchInput = document.getElementById('search');
+      if (searchInput) {
+        searchInput.value = product.name;
+      }
+
+      if (window.goToPage) {
+        window.goToPage('products');
+      }
+
+      setTimeout(async () => {
+        const searchInput2 = document.getElementById('search');
+        if (searchInput2) {
+          searchInput2.value = product.name;
+          await renderProducts(true);
+        }
+      }, 120);
+    };
+  });
 }
 
 async function renderProducts(resetPage) {
@@ -471,11 +354,49 @@ async function renderProducts(resetPage) {
   await populateFilterOptions();
 }
 
-if ($('loadMoreBtn')) {
-  $('loadMoreBtn').onclick = () => {
-    productPage++;
-    renderProducts(false);
+async function getFiltered() {
+  const products = await all('products');
+  let rows = searchProducts(products, $('search') ? $('search').value : '');
+
+  const brand = $('filterBrand') ? $('filterBrand').value : '';
+  const source = $('filterSource') ? $('filterSource').value : '';
+  const ptype = $('filterPriceType') ? $('filterPriceType').value : '';
+  const minP = $('filterMinPrice') ? Number($('filterMinPrice').value || 0) : 0;
+  const maxP = $('filterMaxPrice') ? Number($('filterMaxPrice').value || 0) : 0;
+  const hasCode = $('filterHasCode') ? $('filterHasCode').checked : false;
+
+  if (brand) rows = rows.filter(p => p.brand === brand);
+  if (source) rows = rows.filter(p => p.source === source);
+  if (ptype) rows = rows.filter(p => (p.priceType || 'base') === ptype);
+  if (hasCode) rows = rows.filter(p => !!p.code);
+
+  const rules = await all('rules');
+  const defaultProfit = await setting('defaultProfit', 15);
+
+  let withPrice = rows.map(p => ({
+    p,
+    sell: sellPrice(p, rules, defaultProfit),
+    info: profitInfo(p, rules, defaultProfit)
+  }));
+
+  if (minP > 0) withPrice = withPrice.filter(x => x.sell >= minP);
+  if (maxP > 0) withPrice = withPrice.filter(x => x.sell <= maxP);
+
+  return withPrice;
+}
+
+async function populateFilterOptions() {
+  const products = await all('products');
+  const brands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort((a, b) => norm(a).localeCompare(norm(b), 'fa'));
+  const sources = [...new Set(products.map(p => p.source).filter(Boolean))].sort((a, b) => norm(a).localeCompare(norm(b), 'fa'));
+
+  const fillSelect = (sel, items, current) => {
+    if (!sel) return;
+    sel.innerHTML = sel.querySelector('option').outerHTML + items.map(v => `<option ${v === current ? 'selected' : ''}>${esc(v)}</option>`).join('');
   };
+
+  fillSelect($('filterBrand'), brands, $('filterBrand') ? $('filterBrand').value : '');
+  fillSelect($('filterSource'), sources, $('filterSource') ? $('filterSource').value : '');
 }
 
 function showModal(title, html) {
@@ -492,6 +413,14 @@ if ($('closeModal')) $('closeModal').onclick = closeModal;
 if ($('modalBackdrop')) $('modalBackdrop').onclick = e => {
   if (e.target === $('modalBackdrop')) closeModal();
 };
+
+async function deleteProduct(id) {
+  const p = await get('products', id);
+  if (!p || !confirm('حذف شود؟')) return;
+  await del('products', id);
+  await renderProducts(true);
+  notify('حذف شد');
+}
 
 async function editProduct(id) {
   const p = id ? await get('products', id) : {
@@ -517,54 +446,38 @@ async function editProduct(id) {
       <div class="two"><label>بارکد<input name="barcode" value="${esc(p.barcode)}"></label><label>قیمت پایه (ریال) *<input name="basePrice" inputmode="decimal" required value="${esc(p.basePrice)}"></label></div>
       <div class="two"><label>نوع قیمت<select name="priceType"><option value="base" ${p.priceType !== 'final' ? 'selected' : ''}>قیمت پایه</option><option value="final" ${p.priceType === 'final' ? 'selected' : ''}>قیمت نهایی</option></select></label><label>سود اختصاصی (%)<input name="itemProfitPercent" value="${esc(p.itemProfitPercent ?? '')}"></label></div>
       <div class="two"><label>منبع قیمت<input name="source" value="${esc(p.source || '')}"></label><label>خودرو/گروه<input name="cars" value="${esc((p.cars || []).join(', '))}"></label></div>
-      <div class="modal-actions"><button class="primary" type="submit">ذخیره کالا</button><button class="ghost" type="button" id="cancelProduct">انصراف</button></div>
+      <div class="modal-actions"><button class="primary-btn" type="submit">ذخیره کالا</button><button class="small-btn" type="button" id="cancelProduct">انصراف</button></div>
     </form>
   `);
 
-  $('cancelProduct').onclick = closeModal;
+  if ($('cancelProduct')) $('cancelProduct').onclick = closeModal;
 
-  $('productForm').onsubmit = async e => {
-    e.preventDefault();
-    const f = new FormData(e.target);
+  if ($('productForm')) {
+    $('productForm').onsubmit = async e => {
+      e.preventDefault();
+      const f = new FormData(e.target);
 
-    const next = {
-      ...p,
-      name: String(f.get('name')).trim(),
-      brand: String(f.get('brand')).trim(),
-      code: String(f.get('code')).trim(),
-      barcode: String(f.get('barcode')).trim(),
-      basePrice: num(f.get('basePrice')),
-      priceType: String(f.get('priceType')) === 'final' ? 'final' : 'base',
-      itemProfitPercent: String(f.get('itemProfitPercent') ?? '').trim(),
-      source: String(f.get('source') ?? '').trim(),
-      cars: String(f.get('cars') ?? '').split(',').map(x => x.trim()).filter(Boolean)
+      const next = {
+        ...p,
+        name: String(f.get('name')).trim(),
+        brand: String(f.get('brand')).trim(),
+        code: String(f.get('code')).trim(),
+        barcode: String(f.get('barcode')).trim(),
+        basePrice: num(f.get('basePrice')),
+        priceType: String(f.get('priceType')) === 'final' ? 'final' : 'base',
+        itemProfitPercent: String(f.get('itemProfitPercent') ?? '').trim(),
+        source: String(f.get('source') ?? '').trim(),
+        cars: String(f.get('cars') ?? '').split(',').map(x => x.trim()).filter(Boolean)
+      };
+
+      if (!next.name || next.basePrice <= 0) return notify('نام کالا و قیمت معتبر نیست.');
+
+      await put('products', next);
+      closeModal();
+      await renderProducts(true);
+      notify('ذخیره شد.');
     };
-
-    if (!next.name || next.basePrice <= 0) return notify('نام کالا و قیمت معتبر نیست.');
-
-    await put('products', next);
-    closeModal();
-    await renderProducts(true);
-    notify('ذخیره شد.');
-  };
-}
-
-async function deleteProduct(id) {
-  const p = await get('products', id);
-  if (!p || !confirm('حذف شود؟')) return;
-  await del('products', id);
-  await renderProducts(true);
-  notify('حذف شد');
-}
-
-async function showProductHistory(id) {
-  const h = (await all('history')).filter(x => x.productId === id).sort((a, b) => b.at.localeCompare(a.at));
-  showModal(
-    'سابقه تغییرات',
-    h.length
-      ? h.map(x => `<div class="list-row"><b>${esc(x.field)}</b><small>${esc(x.displayAt || x.at)}</small><div>${esc(x.oldValue)} → ${esc(x.newValue)}</div></div>`).join('')
-      : '<div class="empty">تغییری ثبت نشده است.</div>'
-  );
+  }
 }
 
 async function renderRules() {
@@ -630,12 +543,15 @@ async function renderHistory(resetPage) {
 
 if ($('historyMoreBtn')) $('historyMoreBtn').onclick = () => { historyPage++; renderHistory(false); };
 if ($('historySearch')) $('historySearch').oninput = () => renderHistory(true);
-if ($('clearHistory')) $('clearHistory').onclick = async () => {
-  if (confirm('پاک شود؟')) {
-    await clearStore('history');
-    await renderHistory(true);
-  }
-};
+
+if ($('clearHistory')) {
+  $('clearHistory').onclick = async () => {
+    if (confirm('پاک شود؟')) {
+      await clearStore('history');
+      await renderHistory(true);
+    }
+  };
+}
 
 function applyAppearance() {
   const root = document.documentElement;
@@ -665,7 +581,7 @@ if ($('appearanceBtn')) {
             <option value="purple" ${get('yadak_color', 'orange') === 'purple' ? 'selected' : ''}>بنفش</option>
           </select>
         </label>
-        <button class="primary" type="submit">ذخیره</button>
+        <button class="primary-btn" type="submit">ذخیره</button>
       </form>
     `);
 
@@ -689,7 +605,7 @@ if ($('settingsBtn')) {
         <label>سود پیش‌فرض (%)
           <input name="profit" type="number" step="0.1" value="${esc(def)}">
         </label>
-        <button class="primary" type="submit">ذخیره قیمت</button>
+        <button class="primary-btn" type="submit">ذخیره قیمت</button>
       </form>
     `);
 
@@ -814,7 +730,7 @@ function renderImportMappingModal() {
 
   showModal('نگاشت ستون‌های فایل', `
     <div class="map-grid">${headers.map((h, i) => `<label>${esc(h || 'ستون ' + (i + 1))}<select data-col="${i}">${fieldOpts(inv[i] || '')}</select></label>`).join('')}</div>
-    <div class="modal-actions"><button class="primary" id="buildPreviewBtn">پیش‌نمایش</button><button class="ghost" id="cancelImportBtn">انصراف</button></div>
+    <div class="modal-actions"><button class="primary-btn" id="buildPreviewBtn">پیش‌نمایش</button><button class="small-btn" id="cancelImportBtn">انصراف</button></div>
   `);
 
   $('cancelImportBtn').onclick = () => { pendingImport = null; closeModal(); };
@@ -908,7 +824,7 @@ function renderImportPreviewModal() {
         <tbody>${rows.slice(0, 200).map(r => `<tr class="row-${r.status}"><td>${r.status}</td><td>${esc(r.name)}</td><td>${fmt(r.price)}</td></tr>`).join('')}</tbody>
       </table>
     </div>
-    <div class="modal-actions"><button class="primary" id="confirmImportBtn">تأیید و ثبت</button><button class="ghost" id="cancelImportBtn2">انصراف</button></div>
+    <div class="modal-actions"><button class="primary-btn" id="confirmImportBtn">تأیید و ثبت</button><button class="small-btn" id="cancelImportBtn2">انصراف</button></div>
   `);
 
   $('cancelImportBtn2').onclick = () => { pendingImport = null; closeModal(); };
@@ -996,42 +912,6 @@ if ($('importFile')) {
   };
 }
 
-let searchDebounceTimer;
-
-if ($('search')) {
-  $('search').oninput = () => {
-    clearTimeout(searchDebounceTimer);
-    searchDebounceTimer = setTimeout(() => renderProducts(true), 150);
-  };
-}
-
-if ($('clearSearch')) {
-  $('clearSearch').onclick = () => {
-    $('search').value = '';
-    renderProducts(true);
-  };
-}
-
-['filterBrand', 'filterSource', 'filterPriceType', 'filterMinPrice', 'filterMaxPrice', 'filterHasCode'].forEach(id => {
-  if ($(id)) {
-    $(id).addEventListener('input', () => renderProducts(true));
-    $(id).addEventListener('change', () => renderProducts(true));
-  }
-});
-
-if ($('clearFilters')) {
-  $('clearFilters').onclick = () => {
-    ['filterBrand', 'filterSource', 'filterPriceType', 'filterMinPrice', 'filterMaxPrice'].forEach(id => {
-      if ($(id)) $(id).value = '';
-    });
-
-    if ($('filterHasCode')) $('filterHasCode').checked = false;
-    renderProducts(true);
-  };
-}
-
-if ($('addBtn')) $('addBtn').onclick = () => editProduct(null);
-
 async function refreshAll() {
   await renderProducts(true);
   await renderRules();
@@ -1081,87 +961,93 @@ async function init() {
   }
 }
 
-init().catch(e => {
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('homeSearch');
+  if (input) {
+    input.addEventListener('input', debounce(async () => {
+      await renderHomeSearchResults();
+    }, 180));
+  }
+
+  renderHomeSearchResults();
+});
+
+init().catch(() => {
   notify('خطا در پایگاه داده.');
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('button, [data-goto]').forEach(el => {
-    if (!el.dataset.bindSafe) {
-      el.dataset.bindSafe = '1';
-    }
-  });
-});
-
-const menu = $('sideMenu');
-const shade = $('menuShade');
-const toggle = $('menuToggle');
-const closeBtn = $('menuClose');
+const sideMenu = $('sideMenu');
+const menuShade = $('menuShade');
+const menuToggle = $('menuToggle');
+const menuClose = $('menuClose');
 
 function closeMenu() {
-  if (menu) menu.classList.remove('open');
-  if (shade) shade.classList.remove('open');
+  if (sideMenu) sideMenu.classList.remove('open');
+  if (menuShade) menuShade.classList.remove('open');
   document.body.classList.remove('menu-open');
 }
 
-if (toggle) {
-  toggle.addEventListener('click', () => {
-    if (menu) menu.classList.add('open');
-    if (shade) shade.classList.add('open');
-    document.body.classList.add('menu-open');
-  });
+if (menuToggle) {
+  menuToggle.onclick = () => {
+    if (sideMenu) sideMenu.classList.toggle('open');
+    if (menuShade) menuShade.classList.toggle('open');
+    document.body.classList.toggle('menu-open');
+  };
 }
 
-if (closeBtn) closeBtn.addEventListener('click', closeMenu);
-if (shade) shade.addEventListener('click', closeMenu);
-
-function selectTab(name) {
-  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
-  document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === name));
-
-  if (name === 'products') renderProducts(true);
-  if (name === 'rules') renderRules();
-  if (name === 'history') renderHistory(true);
-  if (name === 'tools') renderSources();
+if (menuClose) {
+  menuClose.onclick = closeMenu;
 }
 
-window.goToPage = function (target) {
-  closeMenu();
-
-  if (target === 'home') {
-    document.body.classList.add('home-view');
-    window.scrollTo(0, 0);
-    return;
-  }
-
-  document.body.classList.remove('home-view');
-
-  if (target === 'search') {
-    selectTab('products');
-    setTimeout(() => { if ($('search')) $('search').focus(); }, 300);
-  } else if (target === 'scanBarcodeBtn') {
-    if ($('scanBarcodeBtn')) $('scanBarcodeBtn').click();
-  } else if (['products', 'history', 'rules', 'tools'].includes(target)) {
-    selectTab(target);
-  } else if (['importExcel', 'restoreFile', 'settingsBtn', 'backupBtn', 'appearanceBtn'].includes(target)) {
-    selectTab('tools');
-    setTimeout(() => {
-      const elId = target === 'importExcel' ? 'importFile' : target;
-      if ($(elId)) $(elId).click();
-    }, 200);
-  }
-};
+if (menuShade) {
+  menuShade.onclick = closeMenu;
+}
 
 document.querySelectorAll('#sideMenu [data-goto]').forEach(btn => {
-  btn.addEventListener('click', () => window.goToPage(btn.dataset.goto));
+  btn.onclick = () => {
+    const target = btn.dataset.goto;
+    if (target === 'home') {
+      document.body.classList.add('home-view');
+      closeMenu();
+      return;
+    }
+
+    document.body.classList.remove('home-view');
+
+    if (target === 'products') {
+      document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'products'));
+      document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'products'));
+    }
+
+    if (target === 'rules') {
+      document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'rules'));
+      document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'rules'));
+    }
+
+    if (target === 'history') {
+      document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'history'));
+      document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'history'));
+    }
+
+    if (target === 'tools') {
+      document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'tools'));
+      document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'tools'));
+    }
+
+    closeMenu();
+  };
 });
 
 document.querySelectorAll('.tab').forEach(b => {
-  b.addEventListener('click', () => window.goToPage(b.dataset.tab));
+  b.onclick = () => {
+    const tab = b.dataset.tab;
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
+    document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === tab));
+  };
 });
 
 if ($('voiceBtn')) {
-  $('voiceBtn').addEventListener('click', () => {
+  $('voiceBtn').onclick = () => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
       notify('دستیار صوتی پشتیبانی نمی‌شود.');
@@ -1172,23 +1058,28 @@ if ($('voiceBtn')) {
     rec.lang = 'fa-IR';
     rec.interimResults = false;
 
-    rec.onstart = () => notify('گوش می‌دهم... (مثلاً: برو به تنظیمات یا اسم قطعه)');
+    rec.onstart = () => notify('گوش می‌دهم...');
     rec.onresult = e => {
       const text = e.results[0][0].transcript.trim().toLowerCase();
 
-      if (text.includes('صفحه اصلی') || text.includes('خانه')) window.goToPage('home');
-      else if (text.includes('تنظیمات') || text.includes('ظاهر')) window.goToPage('settingsBtn');
-      else if (text.includes('قواعد') || text.includes('سود')) window.goToPage('rules');
-      else if (text.includes('تاریخچه')) window.goToPage('history');
-      else if (text.includes('اکسل') || text.includes('ورود')) window.goToPage('tools');
-      else {
-        window.goToPage('products');
-        if ($('search')) $('search').value = text;
-        renderProducts(true);
-        notify(`جستجو: ${text}`);
+      if (text.includes('صفحه اصلی') || text.includes('خانه')) {
+        document.body.classList.add('home-view');
+      } else if (text.includes('تنظیمات') || text.includes('ظاهر')) {
+        if ($('settingsBtn')) $('settingsBtn').click();
+      } else if (text.includes('قواعد') || text.includes('سود')) {
+        if ($('sideMenu')) {
+          const btn = [...document.querySelectorAll('#sideMenu [data-goto]')].find(el => el.dataset.goto === 'rules');
+          if (btn) btn.click();
+        }
+      } else {
+        const query = text;
+        if ($('homeSearch')) {
+          $('homeSearch').value = query;
+          renderHomeSearchResults();
+        }
       }
     };
 
     rec.start();
-  });
+  };
 }
