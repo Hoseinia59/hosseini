@@ -1,8 +1,6 @@
 /* =====================================================
    YADAK PRICE — NAVY & GOLD
-   استایل یکپارچه یدک‌پرایس
 ===================================================== */
-
 :root {
   --bg: #050c16; --card: #0d1a2a; --ink: #f5f7fb; --muted: #9aadc2;
   --line: #263a50; --primary: #ffc400; --primary-ink: #111827;
@@ -10,7 +8,6 @@
   --radius: 15px; --gap: 12px; --shadow: 0 8px 25px rgba(0,0,0,.22);
   font-family: "Vazirmatn", "Segoe UI", Tahoma, sans-serif; color-scheme: dark;
 }
-
 * { box-sizing: border-box; }
 html, body { min-height: 100%; margin: 0; }
 body {
@@ -23,6 +20,28 @@ p { margin-bottom: 0; color: var(--muted); font-size: .9rem; }
 button, input, select, textarea { font-family: inherit; }
 button { cursor: pointer; touch-action: manipulation; }
 .hidden { display: none !important; }
+
+/* Styles for header inside tabs */
+.top {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 22px 18px; padding-top: calc(22px + env(safe-area-inset-top, 0px));
+  min-height: 125px;
+  background: radial-gradient(ellipse at 85% 15%, #193753 0%, transparent 55%), linear-gradient(125deg, #040912, #0c1a2a 65%, #101d2b);
+  color: #fff; border-bottom: 2px solid #c99b20; box-shadow: 0 10px 30px rgba(0,0,0,.28);
+}
+.brand-area { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.brand-mark { width: 58px; height: 58px; flex: 0 0 58px; display: grid; place-items: center; border: 1px solid #d6aa35; border-radius: 16px; background: linear-gradient(145deg, #192d41, #07111e); color: #ffd34f; font-size: 32px; box-shadow: 0 0 22px rgba(233,185,42,.12); }
+.top .eyebrow { color: #e8bd49; font-size: .7rem; font-weight: 800; letter-spacing: .4px; }
+.top h1 { margin-top: 5px; color: #ffd34f; font-size: 1.65rem; font-weight: 900; }
+.top p { color: #c0ccda; font-size: .78rem; line-height: 1.9; margin-top: 4px; }
+.top #installBtn { flex: 0 0 auto; }
+@media (max-width: 480px) {
+  .top { padding-right: 12px; padding-left: 12px; min-height: 108px; gap: 8px; }
+  .brand-mark { width: 44px; height: 44px; flex-basis: 44px; border-radius: 12px; font-size: 25px; }
+  .top h1 { font-size: 1.35rem; }
+  .top .eyebrow { font-size: .56rem; }
+  .top p { font-size: .69rem; }
+}
 
 main { width: 100%; max-width: 820px; margin: 0 auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; }
 .card, .product-card, .list-row, .tool-card { color: var(--ink); background: linear-gradient(145deg, #102034, #091522); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
@@ -117,7 +136,7 @@ footer { padding: 20px 10px 10px; color: var(--muted); text-align: center; font-
 @media (min-width: 700px) { main { padding: 20px; } .product-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } .tool-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 /* =====================================================
-   تنظیمات صفحه اصلی (Home View) و ماشین
+   Home View & Drawer
 ===================================================== */
 :root { --primary:#ffc400; --accent:#ffcf18; }
 body.home-view { background:#030811 !important; color:#f4f7fb; overflow: hidden !important; margin: 0 !important; padding: 0 !important;}
@@ -163,9 +182,6 @@ body.home-view #search::placeholder { color:#aab4c2; }
 body.home-view #voiceBtn { display:grid !important; flex:0 0 46px; width:46px; height:46px; place-items:center; color:#101820; background:#ffc400; border:0; border-radius:50%; font-size:21px; }
 body.home-view #scanBarcodeBtn, body.home-view #scanTextBtn, body.home-view #clearSearch, body.home-view .quick-stats { display:none !important; }
 
-/* =====================================================
-   منوی کشویی
-===================================================== */
 #menuToggle.menu-toggle {
   display: flex !important; position: fixed !important; align-items: center !important; justify-content: center !important;
   width: 58px !important; height: 58px !important; left: 18px !important; bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
@@ -192,7 +208,7 @@ body.home-view #scanBarcodeBtn, body.home-view #scanTextBtn, body.home-view #cle
 .menu-brand span { color:#ffc400; }
 .menu-logo { width:48px; height:48px; object-fit:contain; }
 #menuClose { position:relative; min-width:44px; min-height:44px; color:#fff; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); border-radius:8px; font-size:25px; cursor:pointer; }
-#sideMenu > button { display:flex; align-items:center; gap:14px; min-height:52px; margin:2px 0; padding:10px 12px; color:#eef3fa; background:transparent; border:0; border-bottom:1px solid rgba(83,112,140,.18); border-radius:8px; text-align:right; font-size:.92rem; }
+#sideMenu > button { display:flex; align-items:center; gap:14px; min-height:52px; margin:2px 0; padding:10px 12px; color:#eef3fa; background:transparent; border:0; border-bottom:1px solid rgba(83,112,140,.18); border-radius:8px; text-align:right; font-size:.92rem; cursor:pointer;}
 #sideMenu > button .menu-icon { display:inline-grid; place-items:center; flex:0 0 34px; color:#ffc400; font-size:27px; font-weight:800; }
 #sideMenu > button .menu-arrow { margin-right:auto; color:#8fa1b8; font-size:27px; }
 #sideMenu > button:first-of-type { color:#111827; background:#ffc400; font-weight:900; }
@@ -202,4 +218,3 @@ body.home-view #scanBarcodeBtn, body.home-view #scanTextBtn, body.home-view #cle
 .menu-support div { display:flex; flex-direction:column; gap:4px; }
 .menu-support small { color:#9eafc2; font-size:.75rem; }
 body.menu-open { overflow: hidden !important; }
-             
