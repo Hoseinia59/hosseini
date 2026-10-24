@@ -1,7 +1,4 @@
 'use strict';
-/* =========================================================================
-   یدک‌پرایس — منطق برنامه (نسخه موبایلی، آفلاین، مبتنی بر IndexedDB)
-   ========================================================================= */
 
 const DB_NAME = 'YadakPriceMobile';
 const DB_VERSION = 2;
@@ -15,93 +12,146 @@ const $ = id => document.getElementById(id);
 const now = () => new Date().toLocaleString('fa-IR');
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
-window.__nativeFileState = {
-  isReading: false,
-  fileName: '',
-  size: 0,
-  offset: 0,
-  chunks: []
-};
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM READY');
 
-window.__checkNativeSelectedFile = function () {
-  if (!window.AndroidFileBridge) return;
-  if (!window.AndroidFileBridge.hasPendingFile()) return;
+  document.body.classList.remove('home-view');
 
-  if (window.__nativeFileState.isReading) return;
+  const menuBtn = document.getElementById('menuToggle');
+  const sideMenu = document.getElementById('sideMenu');
+  const menuShade = document.getElementById('menuShade');
 
-  const fileName = window.AndroidFileBridge.getPendingFileName();
-  const size = window.AndroidFileBridge.getPendingFileSize();
+  if (menuBtn) {
+    menuBtn.style.display = 'flex';
+    menuBtn.style.zIndex = '2147483647';
+    menuBtn.style.pointerEvents = 'auto';
 
-  window.__nativeFileState = {
-    isReading: true,
-    fileName: fileName || 'import.xlsx',
-    size: size || 0,
-    offset: 0,
-    chunks: []
-  };
+    menuBtn.onclick = () => {
+      console.log('MENU CLICKED');
 
-  function readNextChunk() {
-    const state = window.__nativeFileState;
-    if (!state || !window.AndroidFileBridge) return;
+      if (sideMenu) {
+        sideMenu.classList.add('open');
+        sideMenu.style.transform = 'translateX(0)';
+        sideMenu.style.visibility = 'visible';
+        sideMenu.style.pointerEvents = 'auto';
+      }
 
-    if (state.offset >= state.size) {
-      finalizeNativeFile();
-      return;
-    }
+      if (menuShade) {
+        menuShade.classList.add('open');
+        menuShade.style.opacity = '1';
+        menuShade.style.visibility = 'visible';
+        menuShade.style.pointerEvents = 'auto';
+      }
 
-    const chunkSize = 64 * 1024;
-    const base64 = window.AndroidFileBridge.readPendingFileChunk(state.offset, chunkSize);
-
-    if (!base64) {
-      finalizeNativeFile();
-      return;
-    }
-
-    state.chunks.push(base64);
-    state.offset += chunkSize;
-    setTimeout(readNextChunk, 0);
+      document.body.classList.add('menu-open');
+    };
   }
 
-  function finalizeNativeFile() {
-    const state = window.__nativeFileState;
-    if (!state) return;
-
-    try {
-      const binaryString = state.chunks.join('');
-      const bytes = Uint8Array.from(atob(binaryString), c => c.charCodeAt(0));
-      const blob = new Blob([bytes], { type: 'application/octet-stream' });
-      const file = new File([blob], state.fileName, { type: blob.type || 'application/octet-stream' });
-
-      const input = document.getElementById('importFile');
-      if (input) {
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-
-        input.files = dataTransfer.files;
-        input.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-    } catch (err) {
-      console.error('Native file bridge error:', err);
-      if (typeof notify === 'function') {
-        notify('خطا در دریافت فایل انتخاب‌شده.');
-      }
-    } finally {
-      if (window.AndroidFileBridge) {
-        window.AndroidFileBridge.clearPendingFile();
+  const closeBtn = document.getElementById('menuClose');
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      if (sideMenu) {
+        sideMenu.classList.remove('open');
+        sideMenu.style.transform = 'translateX(105%)';
+        sideMenu.style.visibility = 'hidden';
+        sideMenu.style.pointerEvents = 'none';
       }
 
-      window.__nativeFileState = {
-        isReading: false,
-        fileName: '',
-        size: 0,
-        offset: 0,
-        chunks: []
-      };
-    }
+      if (menuShade) {
+        menuShade.classList.remove('open');
+        menuShade.style.opacity = '0';
+        menuShade.style.visibility = 'hidden';
+        menuShade.style.pointerEvents = 'none';
+      }
+
+      document.body.classList.remove('menu-open');
+    };
   }
 
-  readNextChunk();
-};
+  if (menuShade) {
+    menuShade.onclick = () => {
+      if (sideMenu) {
+        sideMenu.classList.remove('open');
+        sideMenu.style.transform = 'translateX(105%)';
+        sideMenu.style.visibility = 'hidden';
+        sideMenu.style.pointerEvents = 'none';
+      }
+
+      menuShade.classList.remove('open');
+      menuShade.style.opacity = '0';
+      menuShade.style.visibility = 'hidden';
+      menuShade.style.pointerEvents = 'none';
+
+      document.body.classList.remove('menu-open');
+    };
+  }
+
+  document.querySelectorAll('#sideMenu [data-goto]').forEach(btn => {
+    btn.onclick = () => {
+      const target = btn.dataset.goto;
+
+      console.log('GO TO:', target);
+
+      if (target === 'home') {
+        document.body.classList.add('home-view');
+        return;
+      }
+
+      document.body.classList.remove('home-view');
+
+      if (target === 'search') {
+        document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'products'));
+        document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'products'));
+      }
+
+      if (target === 'products') {
+        document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'products'));
+        document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'products'));
+      }
+
+      if (target === 'rules') {
+        document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'rules'));
+        document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'rules'));
+      }
+
+      if (target === 'history') {
+        document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'history'));
+        document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'history'));
+      }
+
+      if (target === 'tools') {
+        document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'tools'));
+        document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'tools'));
+      }
+
+      if (sideMenu) {
+        sideMenu.classList.remove('open');
+        sideMenu.style.transform = 'translateX(105%)';
+        sideMenu.style.visibility = 'hidden';
+        sideMenu.style.pointerEvents = 'none';
+      }
+
+      if (menuShade) {
+        menuShade.classList.remove('open');
+        menuShade.style.opacity = '0';
+        menuShade.style.visibility = 'hidden';
+        menuShade.style.pointerEvents = 'none';
+      }
+
+      document.body.classList.remove('menu-open');
+    };
+  });
+
+  document.querySelectorAll('.tab').forEach(b => {
+    b.onclick = () => {
+      const tab = b.dataset.tab;
+      document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
+      document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === tab));
+    };
+  });
+
+  console.log('Menu logic initialized');
+});
 
 function norm(v) {
   return String(v ?? '')
@@ -136,10 +186,6 @@ function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-function splitList(v) {
-  return String(v ?? '').split(/[,،\n\r\t ]/).map(x => x.trim()).filter(Boolean);
-}
-
 function notify(s) {
   if (!$('toast')) return;
   $('toast').textContent = s;
@@ -170,7 +216,6 @@ function levenshtein(a, b, max) {
   return dp[a.length][b.length];
 }
 
-/* ------------------------------ لایه IndexedDB ------------------------------ */
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -220,7 +265,6 @@ function put(store, value) {
 
 function putMany(store, values) {
   if (!values || values.length === 0) return Promise.resolve();
-
   return new Promise((resolve, reject) => {
     let tx;
     try {
@@ -260,22 +304,37 @@ async function setting(key, def) {
   return x ? x.value : def;
 }
 
-async function audit(productId, productName, field, oldValue, newValue, actor) {
-  actor = actor || await setting('actor', 'کاربر');
-  await put('history', {
-    id: uid(),
-    productId,
-    productName,
-    field,
-    oldValue: String(oldValue ?? ''),
-    newValue: String(newValue ?? ''),
-    actor,
-    at: new Date().toISOString(),
-    displayAt: now()
-  });
+async function getFiltered() {
+  const products = await all('products');
+  let rows = searchProducts(products, $('search') ? $('search').value : '');
+
+  const brand = $('filterBrand') ? $('filterBrand').value : '';
+  const source = $('filterSource') ? $('filterSource').value : '';
+  const ptype = $('filterPriceType') ? $('filterPriceType').value : '';
+  const minP = $('filterMinPrice') ? Number($('filterMinPrice').value || 0) : 0;
+  const maxP = $('filterMaxPrice') ? Number($('filterMaxPrice').value || 0) : 0;
+  const hasCode = $('filterHasCode') ? $('filterHasCode').checked : false;
+
+  if (brand) rows = rows.filter(p => p.brand === brand);
+  if (source) rows = rows.filter(p => p.source === source);
+  if (ptype) rows = rows.filter(p => (p.priceType || 'base') === ptype);
+  if (hasCode) rows = rows.filter(p => !!p.code);
+
+  const rules = await all('rules');
+  const defaultProfit = await setting('defaultProfit', 15);
+
+  let withPrice = rows.map(p => ({
+    p,
+    sell: sellPrice(p, rules, defaultProfit),
+    info: profitInfo(p, rules, defaultProfit)
+  }));
+
+  if (minP > 0) withPrice = withPrice.filter(x => x.sell >= minP);
+  if (maxP > 0) withPrice = withPrice.filter(x => x.sell <= maxP);
+
+  return withPrice;
 }
 
-/* ---------------------------- موتور قیمت‌گذاری ---------------------------- */
 function isFinalPrice(p) {
   return p.priceType === 'final';
 }
@@ -314,15 +373,8 @@ function sellPrice(p, rules, defaultProfit) {
   return Math.round((Number(p.basePrice) || 0) * (1 + profitInfo(p, rules, defaultProfit).percent / 100));
 }
 
-/* ------------------------------ موتور جست‌وجو ------------------------------ */
 function matchTier(p, qWords, qNorm) {
-  const name = norm(p.name),
-        brand = norm(p.brand),
-        cars = norm((p.cars || []).join(' ')),
-        code = norm(p.code),
-        oem = norm(p.oem),
-        barcode = norm(p.barcode),
-        alt = norm((p.altNames || []).join(' '));
+  const name = norm(p.name), brand = norm(p.brand), cars = norm((p.cars || []).join(' ')), code = norm(p.code), oem = norm(p.oem), barcode = norm(p.barcode), alt = norm((p.altNames || []).join(' '));
 
   if (qNorm && (code === qNorm || oem === qNorm) && (code || oem)) return 0;
   if (qNorm && barcode && barcode === qNorm) return 1;
@@ -369,55 +421,8 @@ function searchProducts(products, query) {
   return scored.map(x => x.p);
 }
 
-/* -------------------------------- رندر کالاها -------------------------------- */
-async function getFiltered() {
-  const products = await all('products');
-  let rows = searchProducts(products, $('search') ? $('search').value : '');
-
-  const brand = $('filterBrand') ? $('filterBrand').value : '';
-  const source = $('filterSource') ? $('filterSource').value : '';
-  const ptype = $('filterPriceType') ? $('filterPriceType').value : '';
-  const minP = $('filterMinPrice') ? Number($('filterMinPrice').value || 0) : 0;
-  const maxP = $('filterMaxPrice') ? Number($('filterMaxPrice').value || 0) : 0;
-  const hasCode = $('filterHasCode') ? $('filterHasCode').checked : false;
-
-  if (brand) rows = rows.filter(p => p.brand === brand);
-  if (source) rows = rows.filter(p => p.source === source);
-  if (ptype) rows = rows.filter(p => (p.priceType || 'base') === ptype);
-  if (hasCode) rows = rows.filter(p => !!p.code);
-
-  const rules = await all('rules');
-  const defaultProfit = await setting('defaultProfit', 15);
-
-  let withPrice = rows.map(p => ({
-    p,
-    sell: sellPrice(p, rules, defaultProfit),
-    info: profitInfo(p, rules, defaultProfit)
-  }));
-
-  if (minP > 0) withPrice = withPrice.filter(x => x.sell >= minP);
-  if (maxP > 0) withPrice = withPrice.filter(x => x.sell <= maxP);
-
-  return withPrice;
-}
-
-async function populateFilterOptions() {
-  const products = await all('products');
-  const brands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort((a, b) => norm(a).localeCompare(norm(b), 'fa'));
-  const sources = [...new Set(products.map(p => p.source).filter(Boolean))].sort((a, b) => norm(a).localeCompare(norm(b), 'fa'));
-
-  const fillSelect = (sel, items, current) => {
-    if (!sel) return;
-    sel.innerHTML = sel.querySelector('option').outerHTML + items.map(v => `<option ${v === current ? 'selected' : ''}>${esc(v)}</option>`).join('');
-  };
-
-  fillSelect($('filterBrand'), brands, $('filterBrand') ? $('filterBrand').value : '');
-  fillSelect($('filterSource'), sources, $('filterSource') ? $('filterSource').value : '');
-}
-
 async function renderProducts(resetPage) {
   if (resetPage) productPage = 1;
-
   const rows = await getFiltered();
 
   if ($('countStat')) $('countStat').textContent = `${fmt(rows.length)} کالا`;
@@ -473,7 +478,6 @@ if ($('loadMoreBtn')) {
   };
 }
 
-/* -------------------------------- مودال و فرم کالا -------------------------------- */
 function showModal(title, html) {
   if ($('modalTitle')) $('modalTitle').textContent = title;
   if ($('modalBody')) $('modalBody').innerHTML = html;
@@ -563,10 +567,628 @@ async function showProductHistory(id) {
   );
 }
 
-/* -------------------------------- قواعد سود و تاریخچه -------------------------------- */
 async function renderRules() {
   const rs = (await all('rules')).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
   if ($('ruleList')) {
     $('ruleList').innerHTML = rs.map(r => `
       <div class="list-row">
-        <b>${esc(r.term)} 
+        <b>${esc(r.term)} ${r.brand ? '· ' + esc(r.brand) : ''}</b>
+        <small>سود ${fmt(r.percent)}٪</small>
+        <button class="small-btn" data-rdel="${r.id}">حذف</button>
+      </div>
+    `).join('');
+
+    $('ruleList').querySelectorAll('[data-rdel]').forEach(b => b.onclick = async () => {
+      await del('rules', b.dataset.rdel);
+      await renderRules();
+      await renderProducts(true);
+      notify('حذف شد');
+    });
+  }
+}
+
+if ($('ruleForm')) {
+  $('ruleForm').onsubmit = async e => {
+    e.preventDefault();
+    const term = $('ruleTerm').value.trim();
+    const brand = $('ruleBrand').value.trim();
+    const percent = Number($('rulePercent').value);
+
+    if (!term && !brand) return notify('نام کالا یا برند الزامی است.');
+    await put('rules', { id: uid(), term, brand, percent, createdAt: new Date().toISOString() });
+
+    e.target.reset();
+    $('rulePercent').value = 10;
+    await renderRules();
+    await renderProducts(true);
+    notify('قاعده ثبت شد');
+  };
+}
+
+async function renderHistory(resetPage) {
+  if (resetPage) historyPage = 1;
+
+  let hs = (await all('history')).sort((a, b) => b.at.localeCompare(a.at));
+  const q = $('historySearch') ? norm($('historySearch').value) : '';
+
+  if (q) hs = hs.filter(h => norm([h.productName, h.field, h.oldValue, h.newValue].join(' ')).includes(q));
+
+  const visible = hs.slice(0, historyPage * 60);
+
+  if ($('historyList')) {
+    $('historyList').innerHTML = visible.map(h => `
+      <div class="list-row">
+        <b>${esc(h.productName)} · ${esc(h.field)}</b>
+        <small>${esc(h.displayAt || h.at)}</small>
+        <div>${esc(h.oldValue)} → ${esc(h.newValue)}</div>
+      </div>
+    `).join('');
+  }
+
+  if ($('historyMoreBtn')) $('historyMoreBtn').classList.toggle('hidden', visible.length >= hs.length);
+}
+
+if ($('historyMoreBtn')) $('historyMoreBtn').onclick = () => { historyPage++; renderHistory(false); };
+if ($('historySearch')) $('historySearch').oninput = () => renderHistory(true);
+if ($('clearHistory')) $('clearHistory').onclick = async () => {
+  if (confirm('پاک شود؟')) {
+    await clearStore('history');
+    await renderHistory(true);
+  }
+};
+
+function applyAppearance() {
+  const root = document.documentElement;
+  root.dataset.theme = localStorage.getItem('yadak_theme') || 'system';
+  root.dataset.color = localStorage.getItem('yadak_color') || 'orange';
+}
+
+applyAppearance();
+
+if ($('appearanceBtn')) {
+  $('appearanceBtn').onclick = () => {
+    const get = (k, f) => localStorage.getItem(k) || f;
+    showModal('تنظیمات ظاهر', `
+      <form id="appearanceForm" class="modal-form">
+        <label>تم
+          <select name="theme">
+            <option value="system" ${get('yadak_theme', 'system') === 'system' ? 'selected' : ''}>سیستم</option>
+            <option value="dark" ${get('yadak_theme', 'system') === 'dark' ? 'selected' : ''}>تیره</option>
+            <option value="light" ${get('yadak_theme', 'system') === 'light' ? 'selected' : ''}>روشن</option>
+          </select>
+        </label>
+        <label>رنگ اصلی
+          <select name="color">
+            <option value="orange" ${get('yadak_color', 'orange') === 'orange' ? 'selected' : ''}>نارنجی</option>
+            <option value="blue" ${get('yadak_color', 'orange') === 'blue' ? 'selected' : ''}>آبی</option>
+            <option value="green" ${get('yadak_color', 'orange') === 'green' ? 'selected' : ''}>سبز</option>
+            <option value="purple" ${get('yadak_color', 'orange') === 'purple' ? 'selected' : ''}>بنفش</option>
+          </select>
+        </label>
+        <button class="primary" type="submit">ذخیره</button>
+      </form>
+    `);
+
+    $('appearanceForm').onsubmit = e => {
+      e.preventDefault();
+      const f = new FormData(e.target);
+      localStorage.setItem('yadak_theme', f.get('theme'));
+      localStorage.setItem('yadak_color', f.get('color'));
+      applyAppearance();
+      closeModal();
+      notify('ظاهر ذخیره شد');
+    };
+  };
+}
+
+if ($('settingsBtn')) {
+  $('settingsBtn').onclick = async () => {
+    const def = await setting('defaultProfit', 15);
+    showModal('تنظیمات قیمت', `
+      <form id="settingsForm" class="modal-form">
+        <label>سود پیش‌فرض (%)
+          <input name="profit" type="number" step="0.1" value="${esc(def)}">
+        </label>
+        <button class="primary" type="submit">ذخیره قیمت</button>
+      </form>
+    `);
+
+    $('settingsForm').onsubmit = async e => {
+      e.preventDefault();
+      await put('settings', { key: 'defaultProfit', value: Number(new FormData(e.target).get('profit')) });
+      closeModal();
+      await renderProducts(true);
+      notify('تنظیمات ذخیره شد');
+    };
+  };
+}
+
+function download(name, content, type = 'text/plain;charset=utf-8') {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+if ($('exportCsv')) {
+  $('exportCsv').onclick = async () => {
+    const ps = await all('products');
+    const lines = [['نام کالا', 'برند', 'کد فنی', 'قیمت پایه'], ...ps.map(p => [p.name, p.brand, p.code, p.basePrice])]
+      .map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    download('yadak-price.csv', '\uFEFF' + lines, 'text/csv;charset=utf-8');
+    notify('خروجی آماده شد');
+  };
+}
+
+if ($('backupBtn')) {
+  $('backupBtn').onclick = async () => {
+    const data = {
+      app: 'YadakPriceMobile',
+      version: DB_VERSION,
+      products: await all('products'),
+      rules: await all('rules'),
+      history: await all('history'),
+      settings: await all('settings'),
+      sources: await all('sources')
+    };
+
+    download(`yadak-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(data, null, 2), 'application/json');
+    notify('پشتیبان گرفته شد');
+  };
+}
+
+if ($('restoreFile')) {
+  $('restoreFile').onchange = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const d = JSON.parse(await file.text());
+      if (d.app !== 'YadakPriceMobile') throw new Error('ساختار فایل معتبر نیست');
+
+      if (!confirm('اطلاعات جایگزین شوند؟')) return;
+
+      for (const s of ['products', 'rules', 'history', 'settings', 'sources']) {
+        await clearStore(s);
+        for (const row of (d[s] || [])) await put(s, row);
+      }
+
+      await refreshAll();
+      notify('بازیابی شد');
+    } catch (err) {
+      notify('خطا: ' + err.message);
+    } finally {
+      e.target.value = '';
+    }
+  };
+}
+
+function detectHeaderAndMapping(rows) {
+  const ALIASES = {
+    name: ['نام کالا', 'شرح کالا', 'نام محصول', 'نام'],
+    price: ['فی فروش', 'قیمت فروش', 'قیمت', 'فی', 'مبلغ'],
+    brand: ['برند', 'Brand', 'Manufacturer'],
+    code: ['کد فنی', 'کد', 'Code', 'کد کالا']
+  };
+
+  const hIndex = (headers, choices) => headers.findIndex(h => choices.some(c => norm(String(h)).includes(norm(c))));
+
+  for (let i = 0; i < Math.min(15, rows.length); i++) {
+    const h = rows[i].map(x => String(x ?? ''));
+    const n = hIndex(h, ALIASES.name);
+    const p = hIndex(h, ALIASES.price);
+
+    if (n >= 0 && p >= 0) {
+      const map = { name: n, price: p, brand: hIndex(h, ALIASES.brand), code: hIndex(h, ALIASES.code) };
+      return { headerRowIndex: i, headers: h, map };
+    }
+  }
+  return null;
+}
+
+async function buildImportPreview(rows, fileName) {
+  const detected = detectHeaderAndMapping(rows);
+  const headerRowIndex = detected ? detected.headerRowIndex : 0;
+  const headers = detected ? detected.headers : (rows[0] || []).map((_, i) => `ستون ${i + 1}`);
+  const map = detected ? detected.map : { name: 0, price: 1, brand: -1, code: -1 };
+
+  pendingImport = { rawRows: rows, headerRowIndex, headers, map, fileName };
+  renderImportMappingModal();
+}
+
+function renderImportMappingModal() {
+  const { headers, map } = pendingImport;
+  const inv = {};
+  for (const k in map) {
+    if (map[k] >= 0) inv[map[k]] = k;
+  }
+
+  const fieldOpts = v => [['', 'نادیده گرفتن'], ['name', 'نام کالا'], ['price', 'قیمت'], ['brand', 'برند'], ['code', 'کد فنی']]
+    .map(([val, l]) => `<option value="${val}" ${val === v ? 'selected' : ''}>${esc(l)}</option>`)
+    .join('');
+
+  showModal('نگاشت ستون‌های فایل', `
+    <div class="map-grid">${headers.map((h, i) => `<label>${esc(h || 'ستون ' + (i + 1))}<select data-col="${i}">${fieldOpts(inv[i] || '')}</select></label>`).join('')}</div>
+    <div class="modal-actions"><button class="primary" id="buildPreviewBtn">پیش‌نمایش</button><button class="ghost" id="cancelImportBtn">انصراف</button></div>
+  `);
+
+  $('cancelImportBtn').onclick = () => { pendingImport = null; closeModal(); };
+
+  $('buildPreviewBtn').onclick = async () => {
+    const newMap = { name: -1, price: -1, brand: -1, code: -1 };
+    document.querySelectorAll('[data-col]').forEach(sel => {
+      if (sel.value) newMap[sel.value] = Number(sel.dataset.col);
+    });
+
+    if (newMap.name < 0 || newMap.price < 0) return notify('ستون نام و قیمت اجباری است.');
+    pendingImport.map = newMap;
+    await computeImportRows();
+    renderImportPreviewModal();
+  };
+}
+
+async function computeImportRows() {
+  const { rawRows, headerRowIndex, headers, map, fileName } = pendingImport;
+  const existing = await all('products');
+  const parsed = [];
+  const existingMap = new Map();
+
+  const identityKeys = p => {
+    const keys = [];
+    if (p.code) keys.push('c:' + norm(p.code));
+    if (!keys.length && p.name) keys.push('n:' + norm(p.name));
+    return keys;
+  };
+
+  for (const p of existing) {
+    for (const k of identityKeys(p)) {
+      if (!existingMap.has(k)) existingMap.set(k, p);
+    }
+  }
+
+  let multiplier = 1;
+  const hStr = norm(headers[map.price] || '');
+  if (/میلیون/.test(hStr)) multiplier = 10000000;
+  else if (/هزار/.test(hStr)) multiplier = 10000;
+  else if (hStr.includes('تومان')) multiplier = 1;
+
+  const sourceRows = rawRows.slice(headerRowIndex + 1);
+
+  for (let i = 0; i < sourceRows.length; i++) {
+    const row = sourceRows[i];
+    const name = String(row[map.name] ?? '').trim();
+    const price = Math.round(num(row[map.price]) * multiplier);
+
+    if (!name || price <= 0) continue;
+
+    const candidate = {
+      name,
+      price,
+      brand: map.brand >= 0 ? String(row[map.brand] ?? '').trim() : '',
+      code: map.code >= 0 ? String(row[map.code] ?? '').trim() : ''
+    };
+
+    parsed.push(candidate);
+  }
+
+  const result = [];
+  for (const r of parsed) {
+    let existingMatch = null;
+    for (const k of identityKeys(r)) {
+      const found = existingMap.get(k);
+      if (found) {
+        existingMatch = found;
+        break;
+      }
+    }
+
+    const status = !existingMatch ? 'new' : (Number(existingMatch.basePrice) !== r.price ? 'updated' : 'skip');
+    result.push({ ...r, status, existingId: existingMatch ? existingMatch.id : null });
+  }
+
+  pendingImport.rows = result;
+  pendingImport.fileName = fileName;
+}
+
+function renderImportPreviewModal() {
+  const rows = pendingImport.rows;
+  const counts = { new: 0, updated: 0, skip: 0 };
+  rows.forEach(r => counts[r.status]++);
+
+  showModal('پیش‌نمایش ورود اطلاعات', `
+    <div class="import-summary"><span>جدید: ${fmt(counts.new)}</span><span>تغییر قیمت: ${fmt(counts.updated)}</span></div>
+    <div style="overflow:auto;max-height:40vh">
+      <table class="import-preview-table">
+        <thead><tr><th>وضعیت</th><th>نام</th><th>قیمت (ریال)</th></tr></thead>
+        <tbody>${rows.slice(0, 200).map(r => `<tr class="row-${r.status}"><td>${r.status}</td><td>${esc(r.name)}</td><td>${fmt(r.price)}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div class="modal-actions"><button class="primary" id="confirmImportBtn">تأیید و ثبت</button><button class="ghost" id="cancelImportBtn2">انصراف</button></div>
+  `);
+
+  $('cancelImportBtn2').onclick = () => { pendingImport = null; closeModal(); };
+
+  $('confirmImportBtn').onclick = async () => {
+    const productsById = new Map((await all('products')).map(p => [p.id, p]));
+    const productsToWrite = [];
+    let added = 0;
+    let updated = 0;
+
+    for (const r of pendingImport.rows) {
+      if (r.status === 'updated' && r.existingId) {
+        const ex = productsById.get(r.existingId);
+        if (ex) {
+          productsToWrite.push({ ...ex, name: r.name, basePrice: r.price, brand: r.brand || ex.brand, code: r.code || ex.code });
+          updated++;
+        }
+      } else if (r.status === 'new') {
+        productsToWrite.push({
+          id: uid(),
+          name: r.name,
+          altNames: [],
+          brand: r.brand,
+          cars: [],
+          code: r.code,
+          oem: '',
+          barcode: '',
+          basePrice: r.price,
+          priceType: 'base',
+          itemProfitPercent: '',
+          source: 'Excel',
+          createdAt: new Date().toISOString()
+        });
+        added++;
+      }
+    }
+
+    await putMany('products', productsToWrite);
+    pendingImport = null;
+    closeModal();
+    await refreshAll();
+    notify(`ثبت شد: ${fmt(added)} جدید، ${fmt(updated)} به‌روزرسانی.`);
+  };
+}
+
+if ($('importFile')) {
+  $('importFile').onchange = async e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    try {
+      let rows;
+
+      if (/\.csv$|\.txt$/i.test(file.name)) {
+        const text = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.readAsText(file, 'UTF-8');
+        });
+
+        rows = text.split('\n').map(r => r.split(','));
+      } else if (/\.xlsx$|\.xls$/i.test(file.name)) {
+        notify('در حال آماده‌سازی فایل اکسل...');
+        if (!window.XLSX) await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+        if (!window.XLSX) throw new Error('کتابخانه اکسل لود نشد.');
+
+        const buffer = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.readAsArrayBuffer(file);
+        });
+
+        const workbook = window.XLSX.read(buffer, { type: 'array' });
+        rows = window.XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1, defval: '' });
+      } else {
+        throw new Error('فقط xlsx, csv پشتیبانی می‌شود.');
+      }
+
+      await buildImportPreview(rows, file.name);
+    } catch (err) {
+      notify('خطا در ورود: ' + err.message);
+    } finally {
+      e.target.value = '';
+    }
+  };
+}
+
+let searchDebounceTimer;
+
+if ($('search')) {
+  $('search').oninput = () => {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => renderProducts(true), 150);
+  };
+}
+
+if ($('clearSearch')) {
+  $('clearSearch').onclick = () => {
+    $('search').value = '';
+    renderProducts(true);
+  };
+}
+
+['filterBrand', 'filterSource', 'filterPriceType', 'filterMinPrice', 'filterMaxPrice', 'filterHasCode'].forEach(id => {
+  if ($(id)) {
+    $(id).addEventListener('input', () => renderProducts(true));
+    $(id).addEventListener('change', () => renderProducts(true));
+  }
+});
+
+if ($('clearFilters')) {
+  $('clearFilters').onclick = () => {
+    ['filterBrand', 'filterSource', 'filterPriceType', 'filterMinPrice', 'filterMaxPrice'].forEach(id => {
+      if ($(id)) $(id).value = '';
+    });
+
+    if ($('filterHasCode')) $('filterHasCode').checked = false;
+    renderProducts(true);
+  };
+}
+
+if ($('addBtn')) $('addBtn').onclick = () => editProduct(null);
+
+async function refreshAll() {
+  await renderProducts(true);
+  await renderRules();
+  await renderHistory(true);
+  await renderSources();
+}
+
+async function renderSources() {
+  const sources = (await all('sources')).sort((a, b) => (a.name || '').localeCompare(b.name || 'fa'));
+  const list = $('sourceList');
+
+  if (!list) return;
+
+  list.innerHTML = sources.length
+    ? sources.map(s => `<div class="list-row"><b>${esc(s.name)}</b><small>${esc(s.type || '')}</small></div>`).join('')
+    : '<div class="empty">منبعی ثبت نشده است.</div>';
+}
+
+if ($('sourceForm')) {
+  $('sourceForm').onsubmit = async e => {
+    e.preventDefault();
+    const name = $('sourceName').value.trim();
+    const type = $('sourceType').value.trim();
+
+    if (!name) return notify('نام منبع الزامی است.');
+    await put('sources', { id: uid(), name, type, createdAt: new Date().toISOString() });
+
+    e.target.reset();
+    await renderSources();
+    notify('منبع ثبت شد');
+  };
+}
+
+async function init() {
+  db = await openDB();
+  if (!await get('settings', 'defaultProfit')) {
+    await put('settings', { key: 'defaultProfit', value: 15 });
+  }
+  await refreshAll();
+
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    navigator.serviceWorker.getRegistrations().then(function (registrations) {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+}
+
+init().catch(e => {
+  notify('خطا در پایگاه داده.');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('button, [data-goto]').forEach(el => {
+    if (!el.dataset.bindSafe) {
+      el.dataset.bindSafe = '1';
+    }
+  });
+});
+
+const menu = $('sideMenu');
+const shade = $('menuShade');
+const toggle = $('menuToggle');
+const closeBtn = $('menuClose');
+
+function closeMenu() {
+  if (menu) menu.classList.remove('open');
+  if (shade) shade.classList.remove('open');
+  document.body.classList.remove('menu-open');
+}
+
+if (toggle) {
+  toggle.addEventListener('click', () => {
+    if (menu) menu.classList.add('open');
+    if (shade) shade.classList.add('open');
+    document.body.classList.add('menu-open');
+  });
+}
+
+if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+if (shade) shade.addEventListener('click', closeMenu);
+
+function selectTab(name) {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
+  document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === name));
+
+  if (name === 'products') renderProducts(true);
+  if (name === 'rules') renderRules();
+  if (name === 'history') renderHistory(true);
+  if (name === 'tools') renderSources();
+}
+
+window.goToPage = function (target) {
+  closeMenu();
+
+  if (target === 'home') {
+    document.body.classList.add('home-view');
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  document.body.classList.remove('home-view');
+
+  if (target === 'search') {
+    selectTab('products');
+    setTimeout(() => { if ($('search')) $('search').focus(); }, 300);
+  } else if (target === 'scanBarcodeBtn') {
+    if ($('scanBarcodeBtn')) $('scanBarcodeBtn').click();
+  } else if (['products', 'history', 'rules', 'tools'].includes(target)) {
+    selectTab(target);
+  } else if (['importExcel', 'restoreFile', 'settingsBtn', 'backupBtn', 'appearanceBtn'].includes(target)) {
+    selectTab('tools');
+    setTimeout(() => {
+      const elId = target === 'importExcel' ? 'importFile' : target;
+      if ($(elId)) $(elId).click();
+    }, 200);
+  }
+};
+
+document.querySelectorAll('#sideMenu [data-goto]').forEach(btn => {
+  btn.addEventListener('click', () => window.goToPage(btn.dataset.goto));
+});
+
+document.querySelectorAll('.tab').forEach(b => {
+  b.addEventListener('click', () => window.goToPage(b.dataset.tab));
+});
+
+if ($('voiceBtn')) {
+  $('voiceBtn').addEventListener('click', () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      notify('دستیار صوتی پشتیبانی نمی‌شود.');
+      return;
+    }
+
+    const rec = new SR();
+    rec.lang = 'fa-IR';
+    rec.interimResults = false;
+
+    rec.onstart = () => notify('گوش می‌دهم... (مثلاً: برو به تنظیمات یا اسم قطعه)');
+    rec.onresult = e => {
+      const text = e.results[0][0].transcript.trim().toLowerCase();
+
+      if (text.includes('صفحه اصلی') || text.includes('خانه')) window.goToPage('home');
+      else if (text.includes('تنظیمات') || text.includes('ظاهر')) window.goToPage('settingsBtn');
+      else if (text.includes('قواعد') || text.includes('سود')) window.goToPage('rules');
+      else if (text.includes('تاریخچه')) window.goToPage('history');
+      else if (text.includes('اکسل') || text.includes('ورود')) window.goToPage('tools');
+      else {
+        window.goToPage('products');
+        if ($('search')) $('search').value = text;
+        renderProducts(true);
+        notify(`جستجو: ${text}`);
+      }
+    };
+
+    rec.start();
+  });
+}
