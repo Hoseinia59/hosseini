@@ -18,23 +18,21 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 function norm(v) {
   return String(v ?? '').toLowerCase().replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/[ۀة]/g, 'ه').replace(/ـ/g, '').replace(/[\u200c\u200f\u200e]/g, ' ').replace(/[.\-_/]/g, ' ').replace(/\s+/g, ' ').trim();
 }
-
 function faNum(v) {
   return String(v ?? '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 }
-
 function num(v) {
   let s = faNum(v).replace(/[٬,،\s]/g, '').replace(/ریال|تومان/g, '').replace(/٫/g, '.');
   if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
   const n = Number(s);
   return Number.isFinite(n) && n >= 0 ? n : 0;
 }
-
 function fmt(v) { return Math.round(Number(v) || 0).toLocaleString('fa-IR'); }
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function splitList(v) { return String(v ?? '').split(/[,،\n]/).map(x => x.trim()).filter(Boolean); }
 
 function notify(s) {
+  if(!$('toast')) return;
   $('toast').textContent = s;
   $('toast').classList.add('show');
   clearTimeout(toastTimer);
@@ -44,8 +42,7 @@ function notify(s) {
 function loadScript(src) {
   return new Promise((res, rej) => {
     const s = document.createElement('script');
-    s.src = src;
-    s.onload = res;
+    s.src = src; s.onload = res;
     s.onerror = () => rej(new Error('بارگذاری کتابخانه ناموفق بود؛ به اینترنت نیاز است.'));
     document.head.appendChild(s);
   });
@@ -83,69 +80,33 @@ function openDB() {
     req.onerror = () => reject(req.error);
   });
 }
-
 function all(store) {
-  return new Promise((res, rej) => {
-    const r = db.transaction(store).objectStore(store).getAll();
-    r.onsuccess = () => res(r.result || []);
-    r.onerror = () => rej(r.error);
-  });
+  return new Promise((res, rej) => { const r = db.transaction(store).objectStore(store).getAll(); r.onsuccess = () => res(r.result || []); r.onerror = () => rej(r.error); });
 }
-
 function get(store, key) {
-  return new Promise((res, rej) => {
-    const r = db.transaction(store).objectStore(store).get(key);
-    r.onsuccess = () => res(r.result);
-    r.onerror = () => rej(r.error);
-  });
+  return new Promise((res, rej) => { const r = db.transaction(store).objectStore(store).get(key); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
 }
-
 function put(store, value) {
-  return new Promise((res, rej) => {
-    const t = db.transaction(store, 'readwrite');
-    t.objectStore(store).put(value);
-    t.oncomplete = () => res(value);
-    t.onerror = () => rej(t.error);
-  });
+  return new Promise((res, rej) => { const t = db.transaction(store, 'readwrite'); t.objectStore(store).put(value); t.oncomplete = () => res(value); t.onerror = () => rej(t.error); });
 }
-
 function putMany(store, values) {
   if (!values || values.length === 0) return Promise.resolve();
   return new Promise((resolve, reject) => {
     let tx;
     try {
-      tx = db.transaction(store, 'readwrite');
-      const objectStore = tx.objectStore(store);
+      tx = db.transaction(store, 'readwrite'); const objectStore = tx.objectStore(store);
       for (const value of values) objectStore.put(value);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error || new Error('ثبت گروهی اطلاعات ناموفق بود.'));
+      tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error || new Error('ثبت گروهی اطلاعات ناموفق بود.')); tx.onabort = () => reject(tx.error || new Error('ثبت گروهی اطلاعات لغو شد.'));
     } catch (err) { reject(err); }
   });
 }
-
 function del(store, key) {
-  return new Promise((res, rej) => {
-    const t = db.transaction(store, 'readwrite');
-    t.objectStore(store).delete(key);
-    t.oncomplete = res;
-    t.onerror = () => rej(t.error);
-  });
+  return new Promise((res, rej) => { const t = db.transaction(store, 'readwrite'); t.objectStore(store).delete(key); t.oncomplete = res; t.onerror = () => rej(t.error); });
 }
-
 function clearStore(store) {
-  return new Promise((res, rej) => {
-    const t = db.transaction(store, 'readwrite');
-    t.objectStore(store).clear();
-    t.oncomplete = res;
-    t.onerror = () => rej(t.error);
-  });
+  return new Promise((res, rej) => { const t = db.transaction(store, 'readwrite'); t.objectStore(store).clear(); t.oncomplete = res; t.onerror = () => rej(t.error); });
 }
-
-async function setting(key, def) {
-  const x = await get('settings', key);
-  return x ? x.value : def;
-}
-
+async function setting(key, def) { const x = await get('settings', key); return x ? x.value : def; }
 async function audit(productId, productName, field, oldValue, newValue, actor) {
   actor = actor || await setting('actor', 'کاربر');
   await put('history', { id: uid(), productId, productName, field, oldValue: String(oldValue ?? ''), newValue: String(newValue ?? ''), actor, at: new Date().toISOString(), displayAt: now() });
@@ -154,8 +115,7 @@ async function audit(productId, productName, field, oldValue, newValue, actor) {
 /* ---------------------------- موتور قیمت‌گذاری ---------------------------- */
 function isFinalPrice(p) { return p.priceType === 'final'; }
 function matchedRule(p, rules) {
-  const name = norm(p.name);
-  const brand = norm(p.brand);
+  const name = norm(p.name), brand = norm(p.brand);
   const matches = rules.filter(r => {
     const termOk = !r.term || name.includes(norm(r.term));
     const brandOk = !r.brand || brand.includes(norm(r.brand));
@@ -165,17 +125,13 @@ function matchedRule(p, rules) {
   matches.sort((a, b) => (norm(b.term).length + norm(b.brand).length) - (norm(a.term).length + norm(a.brand).length));
   return matches[0];
 }
-
 function profitInfo(p, rules, defaultProfit) {
   if (isFinalPrice(p)) return { percent: 0, origin: 'final', label: 'قیمت نهایی · بدون سود اضافه' };
-  if (p.itemProfitPercent !== null && p.itemProfitPercent !== undefined && p.itemProfitPercent !== '') {
-    return { percent: Number(p.itemProfitPercent), origin: 'item', label: `سود اختصاصی کالا ${fmt(p.itemProfitPercent)}٪` };
-  }
+  if (p.itemProfitPercent !== null && p.itemProfitPercent !== undefined && p.itemProfitPercent !== '') { return { percent: Number(p.itemProfitPercent), origin: 'item', label: `سود اختصاصی کالا ${fmt(p.itemProfitPercent)}٪` }; }
   const rule = matchedRule(p, rules);
   if (rule) return { percent: Number(rule.percent), origin: 'group', label: `قاعده گروهی (${[rule.term, rule.brand].filter(Boolean).join(' · ')}) ${fmt(rule.percent)}٪` };
   return { percent: Number(defaultProfit), origin: 'default', label: `سود پیش‌فرض ${fmt(defaultProfit)}٪` };
 }
-
 function sellPrice(p, rules, defaultProfit) {
   if (isFinalPrice(p)) return Number(p.basePrice) || 0;
   const raw = (Number(p.basePrice) || 0) * (1 + profitInfo(p, rules, defaultProfit).percent / 100);
@@ -197,7 +153,6 @@ function matchTier(p, qWords, qNorm) {
   if (qWords.every(inAny)) return 7;
   return null;
 }
-
 function searchProducts(products, query) {
   const qNorm = norm(query);
   if (!qNorm) return products.slice().sort((a, b) => norm(a.name).localeCompare(norm(b.name), 'fa'));
@@ -237,13 +192,11 @@ async function getFiltered() {
 
   const rules = await all('rules');
   const defaultProfit = await setting('defaultProfit', 15);
-
   let withPrice = rows.map(p => ({ p, sell: sellPrice(p, rules, defaultProfit), info: profitInfo(p, rules, defaultProfit) }));
-  if ($('filterMinPrice') && $('filterMinPrice').value) withPrice = withPrice.filter(x => x.sell >= minP);
-  if ($('filterMaxPrice') && $('filterMaxPrice').value) withPrice = withPrice.filter(x => x.sell <= maxP);
+  if (minP > 0) withPrice = withPrice.filter(x => x.sell >= minP);
+  if (maxP > 0) withPrice = withPrice.filter(x => x.sell <= maxP);
   return withPrice;
 }
-
 async function populateFilterOptions() {
   const products = await all('products');
   const brands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort((a, b) => norm(a).localeCompare(norm(b), 'fa'));
@@ -254,7 +207,6 @@ async function populateFilterOptions() {
   fillSelect($('filterBrand'), brands, $('filterBrand') ? $('filterBrand').value : '');
   fillSelect($('filterSource'), sources, $('filterSource') ? $('filterSource').value : '');
 }
-
 async function renderProducts(resetPage) {
   if (resetPage) productPage = 1;
   const rows = await getFiltered();
@@ -284,12 +236,10 @@ async function renderProducts(resetPage) {
         </div>
       </article>
     `).join('');
-    
     $('productList').querySelectorAll('[data-edit]').forEach(b => b.onclick = () => editProduct(b.dataset.edit));
     $('productList').querySelectorAll('[data-hist]').forEach(b => b.onclick = () => showProductHistory(b.dataset.hist));
     $('productList').querySelectorAll('[data-delete]').forEach(b => b.onclick = () => deleteProduct(b.dataset.delete));
   }
-
   if($('emptyProducts')) {
     $('emptyProducts').classList.toggle('hidden', rows.length > 0);
     $('emptyProducts').textContent = ($('search') && $('search').value.trim()) ? 'نتیجه‌ای پیدا نشد.' : 'هنوز کالایی ثبت نشده است. از «کالای جدید» شروع کن.';
@@ -297,19 +247,15 @@ async function renderProducts(resetPage) {
   if($('loadMoreBtn')) $('loadMoreBtn').classList.toggle('hidden', visible.length >= rows.length);
   await populateFilterOptions();
 }
-
 if($('loadMoreBtn')) $('loadMoreBtn').onclick = () => { productPage++; renderProducts(false); };
 
-/* -------------------------------- مودال و فرم -------------------------------- */
+/* -------------------------------- مودال و فرم کالا -------------------------------- */
 function showModal(title, html) {
-  $('modalTitle').textContent = title;
-  $('modalBody').innerHTML = html;
-  $('modalBackdrop').classList.remove('hidden');
+  if($('modalTitle')) $('modalTitle').textContent = title;
+  if($('modalBody')) $('modalBody').innerHTML = html;
+  if($('modalBackdrop')) $('modalBackdrop').classList.remove('hidden');
 }
-
-function closeModal() {
-  $('modalBackdrop').classList.add('hidden');
-}
+function closeModal() { if($('modalBackdrop')) $('modalBackdrop').classList.add('hidden'); }
 
 async function editProduct(id) {
   const p = id ? await get('products', id) : { id: uid(), name: '', altNames: [], brand: '', cars: [], code: '', oem: '', barcode: '', basePrice: 0, priceType: 'base', itemProfitPercent: '', source: 'ورود دستی' };
@@ -321,7 +267,7 @@ async function editProduct(id) {
       <div class="two"><label>کد فنی<input name="code" value="${esc(p.code)}"></label><label>کد OEM<input name="oem" value="${esc(p.oem)}"></label></div>
       <div class="two"><label>بارکد<input name="barcode" value="${esc(p.barcode)}"></label><label>قیمت پایه (ریال) *<input name="basePrice" inputmode="decimal" required value="${esc(p.basePrice)}"></label></div>
       <div class="two">
-        <label>نوع قیمت<select name="priceType"><option value="base" ${p.priceType !== 'final' ? 'selected' : ''}>قیمت پایه (سود اعمال شود)</option><option value="final" ${p.priceType === 'final' ? 'selected' : ''}>قیمت نهایی (بدون سود)</option></select></label>
+        <label>نوع قیمت<select name="priceType"><option value="base" ${p.priceType !== 'final' ? 'selected' : ''}>قیمت پایه (سود اعمال شود)</option><option value="final" ${p.priceType === 'final' ? 'selected' : ''}>قیمت نهایی</option></select></label>
         <label>سود اختصاصی (٪)<input name="itemProfitPercent" type="number" min="0" max="500" step="0.1" value="${esc(p.itemProfitPercent ?? '')}"></label>
       </div>
       <label>منبع قیمت<input name="source" value="${esc(p.source || 'ورود دستی')}"></label>
@@ -330,31 +276,26 @@ async function editProduct(id) {
   `);
   $('cancelProduct').onclick = closeModal;
   $('productForm').onsubmit = async e => {
-    e.preventDefault();
-    const f = new FormData(e.target);
+    e.preventDefault(); const f = new FormData(e.target);
     const next = { ...p, name: String(f.get('name')).trim(), altNames: splitList(f.get('altNames')), brand: String(f.get('brand')).trim(), cars: splitList(f.get('cars')), code: String(f.get('code')).trim(), oem: String(f.get('oem')).trim(), barcode: String(f.get('barcode')).trim(), basePrice: num(f.get('basePrice')), priceType: f.get('priceType'), itemProfitPercent: f.get('itemProfitPercent') === '' ? '' : Number(f.get('itemProfitPercent')), source: String(f.get('source')).trim() || 'ورود دستی', updatedAt: new Date().toISOString() };
     if (!next.name || next.basePrice <= 0) return notify('نام کالا و قیمت پایه معتبر لازم است.');
     await put('products', next);
-    closeModal();
-    await renderProducts(true);
-    notify('کالا ذخیره شد.');
+    if (!id) await audit(next.id, next.name, 'ثبت کالا', '', `${next.basePrice} ریال`);
+    closeModal(); await renderProducts(true); notify('کالا ذخیره شد.');
   };
 }
-
 async function deleteProduct(id) {
   const p = await get('products', id);
   if (!p || !confirm(`کالای «${p.name}» حذف شود؟`)) return;
-  await del('products', id);
-  await renderProducts(true);
-  notify('کالا حذف شد');
+  await audit(id, p.name, 'حذف کالا', 'موجود', 'حذف شد');
+  await del('products', id); await renderProducts(true); notify('کالا حذف شد');
 }
-
 async function showProductHistory(id) {
   const h = (await all('history')).filter(x => x.productId === id).sort((a, b) => b.at.localeCompare(a.at));
   showModal('سابقه تغییرات کالا', h.length ? `<div class="stack">${h.map(x => `<div class="list-row"><b>${esc(x.field)}</b><small>${esc(x.displayAt || x.at)} · ${esc(x.actor || 'کاربر')}</small><div>${esc(x.oldValue || '—')} ← ${esc(x.newValue || '—')}</div></div>`).join('')}</div>` : '<div class="empty">برای این کالا سابقه‌ای ثبت نشده است.</div>');
 }
 
-/* -------------------------------- قواعد سود و تاریخچه -------------------------------- */
+/* -------------------------------- قواعد سود گروهی -------------------------------- */
 async function renderRules() {
   const rs = (await all('rules')).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
   if($('ruleList')) {
@@ -371,6 +312,7 @@ if($('ruleForm')) $('ruleForm').onsubmit = async e => {
   await renderRules(); await renderProducts(true); notify('قاعده ثبت شد');
 };
 
+/* -------------------------------- تاریخچه -------------------------------- */
 async function renderHistory(resetPage) {
   if (resetPage) historyPage = 1;
   let hs = (await all('history')).sort((a, b) => b.at.localeCompare(a.at));
@@ -382,6 +324,4 @@ async function renderHistory(resetPage) {
 }
 if($('historyMoreBtn')) $('historyMoreBtn').onclick = () => { historyPage++; renderHistory(false); };
 if($('historySearch')) $('historySearch').oninput = () => renderHistory(true);
-if($('clearHistory')) $('clearHistory').onclick = async () => { if (confirm('تمام تاریخچه پاک شود؟')) { await clearStore('history'); await renderHistory(true); notify('تاریخچه پاک شد'); } };
-
-/* -------------------------------- منابع قیمت -----------------------------
+if($('clearHistory')) $('clearHistory').onclick = async () => { if (confirm('تمام تاریخچه پاک شود؟')) {
