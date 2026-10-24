@@ -108,24 +108,6 @@ function put(store, value) {
   });
 }
 
-function putMany(store, values) {
-  if (!values || values.length === 0) return Promise.resolve();
-  return new Promise((resolve, reject) => {
-    let tx;
-    try {
-      tx = db.transaction(store, 'readwrite');
-      const objectStore = tx.objectStore(store);
-
-      for (const value of values) objectStore.put(value);
-
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    } catch (err) {
-      reject(err);
-    }
-  });
-}
-
 function del(store, key) {
   return new Promise((res, rej) => {
     const t = db.transaction(store, 'readwrite');
@@ -243,65 +225,64 @@ function sellPrice(p, rules, defaultProfit) {
   return Math.round((Number(p.basePrice) || 0) * (1 + profitInfo(p, rules, defaultProfit).percent / 100));
 }
 
-async function renderHomeSearchResults() {
+async function renderHomePopup() {
   const input = document.getElementById('homeSearch');
-  const resultsBox = document.getElementById('homeSearchResults');
+  const popup = document.getElementById('homeSearchPopup');
 
-  if (!input || !resultsBox) return;
+  if (!input || !popup) return;
 
-  const query = input.value.trim();
+  const q = input.value.trim();
+
+  if (!q) {
+    popup.classList.add('hidden');
+    popup.innerHTML = '';
+    return;
+  }
+
   const products = await all('products');
   const rules = await all('rules');
   const defaultProfit = await setting('defaultProfit', 15);
 
-  let filtered = query ? searchProducts(products, query) : products.slice(0, 6);
+  const filtered = searchProducts(products, q).slice(0, 6);
 
   if (!filtered.length) {
-    resultsBox.innerHTML = '<div class="empty-result">هیچ نتیجه‌ای پیدا نشد.</div>';
+    popup.innerHTML = '<div class=\"homeSearchItem\"><strong>نتیجه‌ای پیدا نشد</strong></div>';
+    popup.classList.remove('hidden');
     return;
   }
 
-  filtered = filtered.slice(0, 8);
-
-  resultsBox.innerHTML = filtered.map(p => {
+  popup.innerHTML = filtered.map(p => {
     const price = sellPrice(p, rules, defaultProfit);
     return `
-      <div class="search-result-card" data-id="${p.id}">
-        <div class="result-name">${esc(p.name)}</div>
-        <div class="result-meta">
-          ${p.brand ? `<span class="result-pill">${esc(p.brand)}</span>` : ''}
-          ${p.code ? `<span class="result-pill">${esc(p.code)}</span>` : ''}
-          ${p.oem ? `<span class="result-pill">OEM: ${esc(p.oem)}</span>` : ''}
-        </div>
-        <div class="result-price">${fmt(price)} ریال</div>
+      <div class="homeSearchItem" data-id="${p.id}">
+        <strong>${esc(p.name)}</strong>
+        <small>${esc(p.brand || 'بدون برند')} • ${esc(p.code || 'بدون کد')}</small>
+        <div class="price">${fmt(price)} ریال</div>
       </div>
     `;
   }).join('');
 
-  resultsBox.querySelectorAll('.search-result-card').forEach(item => {
-    item.onclick = () => {
+  popup.querySelectorAll('.homeSearchItem').forEach(item => {
+    item.addEventListener('click', async () => {
       const id = item.dataset.id;
       const product = products.find(p => p.id === id);
       if (!product) return;
 
-      const searchInput = document.getElementById('search');
-      if (searchInput) {
-        searchInput.value = product.name;
+      input.value = product.name;
+      popup.classList.add('hidden');
+
+      const mainInput = document.getElementById('search');
+      if (mainInput) {
+        mainInput.value = product.name;
       }
 
-      if (window.goToPage) {
-        window.goToPage('products');
+      if (document.getElementById('search')) {
+        await renderProducts(true);
       }
-
-      setTimeout(async () => {
-        const searchInput2 = document.getElementById('search');
-        if (searchInput2) {
-          searchInput2.value = product.name;
-          await renderProducts(true);
-        }
-      }, 120);
-    };
+    });
   });
+
+  popup.classList.remove('hidden');
 }
 
 async function renderProducts(resetPage) {
@@ -553,372 +534,6 @@ if ($('clearHistory')) {
   };
 }
 
-function applyAppearance() {
-  const root = document.documentElement;
-  root.dataset.theme = localStorage.getItem('yadak_theme') || 'system';
-  root.dataset.color = localStorage.getItem('yadak_color') || 'orange';
-}
-
-applyAppearance();
-
-if ($('appearanceBtn')) {
-  $('appearanceBtn').onclick = () => {
-    const get = (k, f) => localStorage.getItem(k) || f;
-    showModal('تنظیمات ظاهر', `
-      <form id="appearanceForm" class="modal-form">
-        <label>تم
-          <select name="theme">
-            <option value="system" ${get('yadak_theme', 'system') === 'system' ? 'selected' : ''}>سیستم</option>
-            <option value="dark" ${get('yadak_theme', 'system') === 'dark' ? 'selected' : ''}>تیره</option>
-            <option value="light" ${get('yadak_theme', 'system') === 'light' ? 'selected' : ''}>روشن</option>
-          </select>
-        </label>
-        <label>رنگ اصلی
-          <select name="color">
-            <option value="orange" ${get('yadak_color', 'orange') === 'orange' ? 'selected' : ''}>نارنجی</option>
-            <option value="blue" ${get('yadak_color', 'orange') === 'blue' ? 'selected' : ''}>آبی</option>
-            <option value="green" ${get('yadak_color', 'orange') === 'green' ? 'selected' : ''}>سبز</option>
-            <option value="purple" ${get('yadak_color', 'orange') === 'purple' ? 'selected' : ''}>بنفش</option>
-          </select>
-        </label>
-        <button class="primary-btn" type="submit">ذخیره</button>
-      </form>
-    `);
-
-    $('appearanceForm').onsubmit = e => {
-      e.preventDefault();
-      const f = new FormData(e.target);
-      localStorage.setItem('yadak_theme', f.get('theme'));
-      localStorage.setItem('yadak_color', f.get('color'));
-      applyAppearance();
-      closeModal();
-      notify('ظاهر ذخیره شد');
-    };
-  };
-}
-
-if ($('settingsBtn')) {
-  $('settingsBtn').onclick = async () => {
-    const def = await setting('defaultProfit', 15);
-    showModal('تنظیمات قیمت', `
-      <form id="settingsForm" class="modal-form">
-        <label>سود پیش‌فرض (%)
-          <input name="profit" type="number" step="0.1" value="${esc(def)}">
-        </label>
-        <button class="primary-btn" type="submit">ذخیره قیمت</button>
-      </form>
-    `);
-
-    $('settingsForm').onsubmit = async e => {
-      e.preventDefault();
-      await put('settings', { key: 'defaultProfit', value: Number(new FormData(e.target).get('profit')) });
-      closeModal();
-      await renderProducts(true);
-      notify('تنظیمات ذخیره شد');
-    };
-  };
-}
-
-function download(name, content, type = 'text/plain;charset=utf-8') {
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-if ($('exportCsv')) {
-  $('exportCsv').onclick = async () => {
-    const ps = await all('products');
-    const lines = [['نام کالا', 'برند', 'کد فنی', 'قیمت پایه'], ...ps.map(p => [p.name, p.brand, p.code, p.basePrice])]
-      .map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-
-    download('yadak-price.csv', '\uFEFF' + lines, 'text/csv;charset=utf-8');
-    notify('خروجی آماده شد');
-  };
-}
-
-if ($('backupBtn')) {
-  $('backupBtn').onclick = async () => {
-    const data = {
-      app: 'YadakPriceMobile',
-      version: DB_VERSION,
-      products: await all('products'),
-      rules: await all('rules'),
-      history: await all('history'),
-      settings: await all('settings'),
-      sources: await all('sources')
-    };
-
-    download(`yadak-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(data, null, 2), 'application/json');
-    notify('پشتیبان گرفته شد');
-  };
-}
-
-if ($('restoreFile')) {
-  $('restoreFile').onchange = async e => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      const d = JSON.parse(await file.text());
-      if (d.app !== 'YadakPriceMobile') throw new Error('ساختار فایل معتبر نیست');
-
-      if (!confirm('اطلاعات جایگزین شوند؟')) return;
-
-      for (const s of ['products', 'rules', 'history', 'settings', 'sources']) {
-        await clearStore(s);
-        for (const row of (d[s] || [])) await put(s, row);
-      }
-
-      await refreshAll();
-      notify('بازیابی شد');
-    } catch (err) {
-      notify('خطا: ' + err.message);
-    } finally {
-      e.target.value = '';
-    }
-  };
-}
-
-function detectHeaderAndMapping(rows) {
-  const ALIASES = {
-    name: ['نام کالا', 'شرح کالا', 'نام محصول', 'نام'],
-    price: ['فی فروش', 'قیمت فروش', 'قیمت', 'فی', 'مبلغ'],
-    brand: ['برند', 'Brand', 'Manufacturer'],
-    code: ['کد فنی', 'کد', 'Code', 'کد کالا']
-  };
-
-  const hIndex = (headers, choices) => headers.findIndex(h => choices.some(c => norm(String(h)).includes(norm(c))));
-
-  for (let i = 0; i < Math.min(15, rows.length); i++) {
-    const h = rows[i].map(x => String(x ?? ''));
-    const n = hIndex(h, ALIASES.name);
-    const p = hIndex(h, ALIASES.price);
-
-    if (n >= 0 && p >= 0) {
-      const map = { name: n, price: p, brand: hIndex(h, ALIASES.brand), code: hIndex(h, ALIASES.code) };
-      return { headerRowIndex: i, headers: h, map };
-    }
-  }
-  return null;
-}
-
-async function buildImportPreview(rows, fileName) {
-  const detected = detectHeaderAndMapping(rows);
-  const headerRowIndex = detected ? detected.headerRowIndex : 0;
-  const headers = detected ? detected.headers : (rows[0] || []).map((_, i) => `ستون ${i + 1}`);
-  const map = detected ? detected.map : { name: 0, price: 1, brand: -1, code: -1 };
-
-  pendingImport = { rawRows: rows, headerRowIndex, headers, map, fileName };
-  renderImportMappingModal();
-}
-
-function renderImportMappingModal() {
-  const { headers, map } = pendingImport;
-  const inv = {};
-  for (const k in map) {
-    if (map[k] >= 0) inv[map[k]] = k;
-  }
-
-  const fieldOpts = v => [['', 'نادیده گرفتن'], ['name', 'نام کالا'], ['price', 'قیمت'], ['brand', 'برند'], ['code', 'کد فنی']]
-    .map(([val, l]) => `<option value="${val}" ${val === v ? 'selected' : ''}>${esc(l)}</option>`)
-    .join('');
-
-  showModal('نگاشت ستون‌های فایل', `
-    <div class="map-grid">${headers.map((h, i) => `<label>${esc(h || 'ستون ' + (i + 1))}<select data-col="${i}">${fieldOpts(inv[i] || '')}</select></label>`).join('')}</div>
-    <div class="modal-actions"><button class="primary-btn" id="buildPreviewBtn">پیش‌نمایش</button><button class="small-btn" id="cancelImportBtn">انصراف</button></div>
-  `);
-
-  $('cancelImportBtn').onclick = () => { pendingImport = null; closeModal(); };
-
-  $('buildPreviewBtn').onclick = async () => {
-    const newMap = { name: -1, price: -1, brand: -1, code: -1 };
-    document.querySelectorAll('[data-col]').forEach(sel => {
-      if (sel.value) newMap[sel.value] = Number(sel.dataset.col);
-    });
-
-    if (newMap.name < 0 || newMap.price < 0) return notify('ستون نام و قیمت اجباری است.');
-    pendingImport.map = newMap;
-    await computeImportRows();
-    renderImportPreviewModal();
-  };
-}
-
-async function computeImportRows() {
-  const { rawRows, headerRowIndex, headers, map, fileName } = pendingImport;
-  const existing = await all('products');
-  const parsed = [];
-  const existingMap = new Map();
-
-  const identityKeys = p => {
-    const keys = [];
-    if (p.code) keys.push('c:' + norm(p.code));
-    if (!keys.length && p.name) keys.push('n:' + norm(p.name));
-    return keys;
-  };
-
-  for (const p of existing) {
-    for (const k of identityKeys(p)) {
-      if (!existingMap.has(k)) existingMap.set(k, p);
-    }
-  }
-
-  let multiplier = 1;
-  const hStr = norm(headers[map.price] || '');
-  if (/میلیون/.test(hStr)) multiplier = 10000000;
-  else if (/هزار/.test(hStr)) multiplier = 10000;
-  else if (hStr.includes('تومان')) multiplier = 1;
-
-  const sourceRows = rawRows.slice(headerRowIndex + 1);
-
-  for (let i = 0; i < sourceRows.length; i++) {
-    const row = sourceRows[i];
-    const name = String(row[map.name] ?? '').trim();
-    const price = Math.round(num(row[map.price]) * multiplier);
-
-    if (!name || price <= 0) continue;
-
-    const candidate = {
-      name,
-      price,
-      brand: map.brand >= 0 ? String(row[map.brand] ?? '').trim() : '',
-      code: map.code >= 0 ? String(row[map.code] ?? '').trim() : ''
-    };
-
-    parsed.push(candidate);
-  }
-
-  const result = [];
-  for (const r of parsed) {
-    let existingMatch = null;
-    for (const k of identityKeys(r)) {
-      const found = existingMap.get(k);
-      if (found) {
-        existingMatch = found;
-        break;
-      }
-    }
-
-    const status = !existingMatch ? 'new' : (Number(existingMatch.basePrice) !== r.price ? 'updated' : 'skip');
-    result.push({ ...r, status, existingId: existingMatch ? existingMatch.id : null });
-  }
-
-  pendingImport.rows = result;
-  pendingImport.fileName = fileName;
-}
-
-function renderImportPreviewModal() {
-  const rows = pendingImport.rows;
-  const counts = { new: 0, updated: 0, skip: 0 };
-  rows.forEach(r => counts[r.status]++);
-
-  showModal('پیش‌نمایش ورود اطلاعات', `
-    <div class="import-summary"><span>جدید: ${fmt(counts.new)}</span><span>تغییر قیمت: ${fmt(counts.updated)}</span></div>
-    <div style="overflow:auto;max-height:40vh">
-      <table class="import-preview-table">
-        <thead><tr><th>وضعیت</th><th>نام</th><th>قیمت (ریال)</th></tr></thead>
-        <tbody>${rows.slice(0, 200).map(r => `<tr class="row-${r.status}"><td>${r.status}</td><td>${esc(r.name)}</td><td>${fmt(r.price)}</td></tr>`).join('')}</tbody>
-      </table>
-    </div>
-    <div class="modal-actions"><button class="primary-btn" id="confirmImportBtn">تأیید و ثبت</button><button class="small-btn" id="cancelImportBtn2">انصراف</button></div>
-  `);
-
-  $('cancelImportBtn2').onclick = () => { pendingImport = null; closeModal(); };
-
-  $('confirmImportBtn').onclick = async () => {
-    const productsById = new Map((await all('products')).map(p => [p.id, p]));
-    const productsToWrite = [];
-    let added = 0;
-    let updated = 0;
-
-    for (const r of pendingImport.rows) {
-      if (r.status === 'updated' && r.existingId) {
-        const ex = productsById.get(r.existingId);
-        if (ex) {
-          productsToWrite.push({ ...ex, name: r.name, basePrice: r.price, brand: r.brand || ex.brand, code: r.code || ex.code });
-          updated++;
-        }
-      } else if (r.status === 'new') {
-        productsToWrite.push({
-          id: uid(),
-          name: r.name,
-          altNames: [],
-          brand: r.brand,
-          cars: [],
-          code: r.code,
-          oem: '',
-          barcode: '',
-          basePrice: r.price,
-          priceType: 'base',
-          itemProfitPercent: '',
-          source: 'Excel',
-          createdAt: new Date().toISOString()
-        });
-        added++;
-      }
-    }
-
-    await putMany('products', productsToWrite);
-    pendingImport = null;
-    closeModal();
-    await refreshAll();
-    notify(`ثبت شد: ${fmt(added)} جدید، ${fmt(updated)} به‌روزرسانی.`);
-  };
-}
-
-if ($('importFile')) {
-  $('importFile').onchange = async e => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-
-    try {
-      let rows;
-
-      if (/\.csv$|\.txt$/i.test(file.name)) {
-        const text = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.readAsText(file, 'UTF-8');
-        });
-
-        rows = text.split('\n').map(r => r.split(','));
-      } else if (/\.xlsx$|\.xls$/i.test(file.name)) {
-        notify('در حال آماده‌سازی فایل اکسل...');
-        if (!window.XLSX) await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
-        if (!window.XLSX) throw new Error('کتابخانه اکسل لود نشد.');
-
-        const buffer = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.readAsArrayBuffer(file);
-        });
-
-        const workbook = window.XLSX.read(buffer, { type: 'array' });
-        rows = window.XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1, defval: '' });
-      } else {
-        throw new Error('فقط xlsx, csv پشتیبانی می‌شود.');
-      }
-
-      await buildImportPreview(rows, file.name);
-    } catch (err) {
-      notify('خطا در ورود: ' + err.message);
-    } finally {
-      e.target.value = '';
-    }
-  };
-}
-
-async function refreshAll() {
-  await renderProducts(true);
-  await renderRules();
-  await renderHistory(true);
-  await renderSources();
-}
-
 async function renderSources() {
   const sources = (await all('sources')).sort((a, b) => (a.name || '').localeCompare(b.name || 'fa'));
   const list = $('sourceList');
@@ -961,15 +576,33 @@ async function init() {
   }
 }
 
+async function refreshAll() {
+  await renderProducts(true);
+  await renderRules();
+  await renderHistory(true);
+  await renderSources();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const input = document.getElementById('homeSearch');
   if (input) {
     input.addEventListener('input', debounce(async () => {
-      await renderHomeSearchResults();
+      await renderHomePopup();
     }, 180));
-  }
 
-  renderHomeSearchResults();
+    input.addEventListener('blur', () => {
+      setTimeout(() => {
+        const popup = document.getElementById('homeSearchPopup');
+        if (popup) popup.classList.add('hidden');
+      }, 140);
+    });
+
+    input.addEventListener('focus', () => {
+      if (input.value.trim()) {
+        renderHomePopup();
+      }
+    });
+  }
 });
 
 init().catch(() => {
@@ -1006,43 +639,24 @@ if (menuShade) {
 document.querySelectorAll('#sideMenu [data-goto]').forEach(btn => {
   btn.onclick = () => {
     const target = btn.dataset.goto;
-    if (target === 'home') {
-      document.body.classList.add('home-view');
-      closeMenu();
-      return;
-    }
-
-    document.body.classList.remove('home-view');
 
     if (target === 'products') {
-      document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'products'));
       document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'products'));
     }
 
     if (target === 'rules') {
-      document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'rules'));
       document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'rules'));
     }
 
     if (target === 'history') {
-      document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'history'));
       document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'history'));
     }
 
     if (target === 'tools') {
-      document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === 'tools'));
       document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'tools'));
     }
 
     closeMenu();
-  };
-});
-
-document.querySelectorAll('.tab').forEach(b => {
-  b.onclick = () => {
-    const tab = b.dataset.tab;
-    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
-    document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === tab));
   };
 });
 
@@ -1063,19 +677,17 @@ if ($('voiceBtn')) {
       const text = e.results[0][0].transcript.trim().toLowerCase();
 
       if (text.includes('صفحه اصلی') || text.includes('خانه')) {
-        document.body.classList.add('home-view');
+        document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'products'));
       } else if (text.includes('تنظیمات') || text.includes('ظاهر')) {
         if ($('settingsBtn')) $('settingsBtn').click();
       } else if (text.includes('قواعد') || text.includes('سود')) {
-        if ($('sideMenu')) {
-          const btn = [...document.querySelectorAll('#sideMenu [data-goto]')].find(el => el.dataset.goto === 'rules');
-          if (btn) btn.click();
-        }
+        document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'rules'));
+      } else if (text.includes('تاریخچه')) {
+        document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'history'));
       } else {
-        const query = text;
         if ($('homeSearch')) {
-          $('homeSearch').value = query;
-          renderHomeSearchResults();
+          $('homeSearch').value = text;
+          renderHomePopup();
         }
       }
     };
