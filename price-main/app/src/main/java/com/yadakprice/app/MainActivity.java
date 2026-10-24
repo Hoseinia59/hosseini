@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
 
     private static final String VIRTUAL_DOMAIN = "appassets.androidplatform.net";
+
     private static final int WEB_PERMISSION_REQUEST = 1001;
     private static final int FILE_CHOOSER_REQUEST = 1002;
 
@@ -312,7 +313,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(
+            int requestCode,
+            int resultCode,
+            Intent data
+    ) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == FILE_CHOOSER_REQUEST) {
@@ -329,10 +334,12 @@ public class MainActivity extends AppCompatActivity {
 
             if (fileChooserCallback != null) {
                 Uri[] results = selectedUri == null ? null : new Uri[]{selectedUri};
+
                 fileChooserCallback.onReceiveValue(results);
                 fileChooserCallback = null;
             } else if (selectedUri != null) {
-                fileExecutor.execute(() -> recoverSelectedFile(selectedUri));
+                final Uri uriToRead = selectedUri;
+                fileExecutor.execute(() -> recoverSelectedFile(uriToRead));
             }
         }
     }
@@ -430,10 +437,11 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == WEB_PERMISSION_REQUEST) {
             finishWebPermissionRequest();
 
-            boolean cameraGranted = ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED;
+            boolean cameraGranted =
+                    ContextCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED;
 
             if (!cameraGranted) {
                 Toast.makeText(
