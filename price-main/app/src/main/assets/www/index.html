@@ -1,182 +1,152 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#030811">
-  <meta name="description" content="یدک‌پرایس؛ موتور هوشمند جست‌وجو و قیمت‌گذاری قطعات یدکی خودرو">
-
-  <!-- Anti-Cache for PWA -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for(let registration of registrations) { registration.unregister(); }
-      });
-    }
-  </script>
-
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg">
-  <link rel="stylesheet" href="style.css?v=final1">
-  <title>یدک‌پرایس | قیمت‌یاب قطعات یدکی</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>یدک‌پرایس</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
-<body class="home-view">
+<body>
+  <div id="app">
+    <div id="toast" class="toast"></div>
 
-  <header class="top hidden-on-home">
-    <div class="brand-area">
-      <div class="brand-mark" aria-hidden="true">✦</div>
-      <div>
-        <div class="eyebrow">SMART AUTO PARTS · PRICE ENGINE</div>
-        <h1>یدک‌پرایس</h1>
-        <p>مرکز هوشمند جست‌وجو و قیمت‌گذاری قطعات خودرو</p>
+    <section class="car-hero">
+      <div class="hero-brand-wrap">
+        <div class="brand-badge">
+          <span>یدک‌پرایس</span>
+        </div>
+        <div class="hero-subtitle">قیمت واقعی لوازم یدکی خودرو</div>
       </div>
-    </div>
-    <button id="installBtn" class="ghost hidden" type="button">نصب برنامه</button>
-  </header>
-  
-  <button id="menuToggle" class="menu-toggle" type="button" aria-label="باز کردن منو">☰</button>
-  <div id="menuShade" class="menu-shade"></div>
 
-  <nav id="sideMenu" class="side-menu" aria-label="منوی اصلی">
-    <div class="menu-brand">
-      <img class="menu-logo" src="brand-logo.svg" alt="لوگو" onerror="this.style.display='none'">
-      <strong>یدک <span>پرایس</span></strong>
-      <button id="menuClose" type="button" aria-label="بستن منو">✕</button>
-    </div>
-    <button data-goto="home"><span class="menu-icon">⌂</span> صفحه اصلی <span class="menu-arrow">‹</span></button>
-    <button data-goto="search"><span class="menu-icon">⌕</span> جستجوی قطعه <span class="menu-arrow">‹</span></button>
-    <button data-goto="scanBarcodeBtn"><span class="menu-icon">▥</span> اسکن بارکد <span class="menu-arrow">‹</span></button>
-    <button data-goto="products"><span class="menu-icon">▦</span> فهرست کالاها <span class="menu-arrow">‹</span></button>
-    <button data-goto="history"><span class="menu-icon">◷</span> تاریخچه قیمت <span class="menu-arrow">‹</span></button>
-    <button data-goto="importExcel"><span class="menu-icon">▤</span> ورود Excel و PDF <span class="menu-arrow">‹</span></button>
-    <button data-goto="rules"><span class="menu-icon">٪</span> قواعد سود <span class="menu-arrow">‹</span></button>
-    <button data-goto="settingsBtn"><span class="menu-icon">⚙</span> تنظیمات قیمت <span class="menu-arrow">‹</span></button>
-    <button data-goto="appearanceBtn"><span class="menu-icon">◐</span> تنظیمات ظاهر <span class="menu-arrow">‹</span></button>
-    <button data-goto="backupBtn"><span class="menu-icon">▤</span> پشتیبان‌گیری <span class="menu-arrow">‹</span></button>
-    <button data-goto="restoreFile"><span class="menu-icon">↻</span> بازیابی پشتیبان <span class="menu-arrow">‹</span></button>
-    <div class="menu-support"><span class="menu-icon">☏</span><div><b>پشتیبانی</b><small>پاسخگوی شما هستیم</small></div></div>
-  </nav>
-
-  <main>
-    <section class="car-hero" aria-label="صفحه اصلی یدک پرایس">
-      <div class="hero-brand">
-        <img class="hero-logo-image" src="brand-logo.svg" alt="لوگوی یدک پرایس" onerror="this.style.display='none'">
-        <div class="hero-wordmark"><span>یدک</span> <b>پرایس</b></div>
-        <div class="hero-tagline">قیمت واقعی لوازم یدکی خودرو</div>
+      <div class="hero-car-frame">
+        <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=80" alt="خودرو" />
       </div>
-      <img src="car.png.webp" alt="خودروی ماشین" onerror="this.style.display='none'">
-      <div class="hero-bottom-lines" aria-hidden="true"></div>
+
+      <div class="hero-bottom-lines"></div>
+
+      <div class="home-search-wrap">
+        <input
+          id="homeSearch"
+          type="text"
+          placeholder="نام قطعه، برند، کد فنی، OEM، بارکد..."
+          autocomplete="off"
+          aria-label="جستجوی سریع قطعه"
+        />
+      </div>
+
+      <div id="homeSearchResults" class="home-search-results" aria-live="polite"></div>
     </section>
 
-    <section class="search-panel card">
-      <div class="search-line">
-        <input id="search" type="text" placeholder="نام قطعه، کد فنی، OEM، بارکد، برند…" autocomplete="off">
-        <button id="scanBarcodeBtn" class="icon-btn" type="button" title="اسکن بارکد">📷</button>
-        <button id="scanTextBtn" class="icon-btn" type="button" title="خواندن نوشته قطعه">🔤</button>
-        <button id="voiceBtn" class="icon-btn" type="button" title="جست‌وجوی صوتی">🎙️</button>
-        <button id="clearSearch" class="icon-btn" type="button" title="پاک کردن">×</button>
-      </div>
+    <main class="main-shell">
+      <nav id="sideMenu" class="side-menu">
+        <div class="side-head">
+          <button id="menuClose" class="menu-close">×</button>
+        </div>
+        <button class="nav-item" data-goto="products">محصولات</button>
+        <button class="nav-item" data-goto="rules">قواعد سود</button>
+        <button class="nav-item" data-goto="history">تاریخچه</button>
+        <button class="nav-item" data-goto="tools">ابزارها</button>
+      </nav>
 
-      <div class="quick-stats">
-        <span id="countStat">۰ کالا</span>
-        <span id="dbStat">ذخیره‌شده روی همین دستگاه</span>
-      </div>
+      <div id="menuShade" class="menu-shade"></div>
 
-      <div class="filter-line hidden-on-home">
-        <select id="filterBrand"><option value="">همه برندها</option></select>
-        <select id="filterSource"><option value="">همه منابع</option></select>
-        <select id="filterPriceType">
-          <option value="">همه انواع قیمت</option>
-          <option value="base">قیمت پایه (مشمول سود)</option>
-          <option value="final">قیمت نهایی (بدون سود اضافه)</option>
-        </select>
-        <input id="filterMinPrice" type="number" min="0" placeholder="حداقل قیمت فروش" inputmode="decimal">
-        <input id="filterMaxPrice" type="number" min="0" placeholder="حداکثر قیمت فروش" inputmode="decimal">
-        <label class="chk">
-          <input id="filterHasCode" type="checkbox"> فقط دارای کد فنی
-        </label>
-        <button id="clearFilters" class="ghost small" type="button">پاک‌کردن فیلترها</button>
-      </div>
-    </section>
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="menuToggle" class="menu-toggle" aria-label="باز کردن منو">☰</button>
+        </div>
 
-    <nav class="tabs hidden-on-home" aria-label="بخش‌های برنامه">
-      <button class="tab active" type="button" data-tab="products">کالاها</button>
-      <button class="tab" type="button" data-tab="rules">قواعد سود</button>
-      <button class="tab" type="button" data-tab="history">تاریخچه</button>
-      <button class="tab" type="button" data-tab="tools">ورود و پشتیبان</button>
-    </nav>
+        <div class="topbar-right">
+          <button id="voiceBtn" class="icon-btn" aria-label="جستجوی صوتی">🎤</button>
+          <button id="settingsBtn" class="icon-btn" aria-label="تنظیمات">⚙️</button>
+        </div>
+      </header>
 
-    <section id="products" class="pane active hidden-on-home">
-      <div class="section-head">
-        <div><h2>فهرست کالاها</h2></div>
-        <button id="addBtn" class="primary" type="button">＋ کالای جدید</button>
-      </div>
-      <div id="productList" class="product-list"></div>
-      <div id="emptyProducts" class="empty">هنوز کالایی ثبت نشده است.</div>
-      <button id="loadMoreBtn" class="ghost full hidden" type="button">نمایش موارد بیشتر</button>
-    </section>
+      <section id="products" class="pane active">
+        <div class="toolbar">
+          <input id="search" type="text" placeholder="جستجو..." />
+          <button id="clearSearch" class="small-btn">پاک</button>
+          <button id="addBtn" class="primary-btn">+ جدید</button>
+        </div>
 
-    <section id="rules" class="pane hidden-on-home">
-      <div class="section-head"><div><h2>قواعد سود گروهی</h2></div></div>
-      <form id="ruleForm" class="card form-grid">
-        <label>عبارت در نام کالا<input id="ruleTerm" placeholder="مثلاً لنت"></label>
-        <label>برند (اختیاری)<input id="ruleBrand" placeholder="مثلاً اتحاد موتور"></label>
-        <label>درصد سود<input id="rulePercent" type="number" min="0" max="500" step="0.1" value="10" required></label>
-        <button class="primary" type="submit">اعمال قاعده روی کالاهای منطبق</button>
-      </form>
-      <div id="ruleList" class="stack"></div>
-    </section>
+        <div class="filters">
+          <select id="filterBrand">
+            <option value="">همه برندها</option>
+          </select>
+          <select id="filterSource">
+            <option value="">همه منابع</option>
+          </select>
+          <select id="filterPriceType">
+            <option value="">همه نوع قیمتی</option>
+            <option value="base">پایه</option>
+            <option value="final">نهایی</option>
+          </select>
+          <input id="filterMinPrice" type="number" placeholder="حداقل قیمت" />
+          <input id="filterMaxPrice" type="number" placeholder="حداکثر قیمت" />
+          <label><input id="filterHasCode" type="checkbox" /> فقط کددار</label>
+          <button id="clearFilters" class="small-btn">پاک کردن فیلتر</button>
+        </div>
 
-    <section id="history" class="pane hidden-on-home">
-      <div class="section-head">
-        <div><h2>تاریخچه تغییرات</h2></div>
-        <button id="clearHistory" class="ghost" type="button">پاک‌کردن تاریخچه</button>
-      </div>
-      <div class="filter-line"><input id="historySearch" type="text" placeholder="جست‌وجو در تاریخچه…"></div>
-      <div id="historyList" class="stack"></div>
-      <button id="historyMoreBtn" class="ghost full hidden" type="button">نمایش موارد بیشتر</button>
-    </section>
+        <div id="countStat" class="count-stat">0 کالا</div>
+        <div id="productList" class="product-list"></div>
+        <button id="loadMoreBtn" class="load-more hidden">نمایش بیشتر</button>
+        <div id="emptyProducts" class="empty hidden">هنوز کالایی ثبت نشده است.</div>
+      </section>
 
-    <section id="tools" class="pane hidden-on-home">
-      <div class="section-head"><div><h2>ورود اطلاعات و پشتیبان</h2></div></div>
-      <div class="tool-grid">
-        <label class="tool-card"><span class="tool-icon">📊</span><b>ورود Excel / CSV</b><input id="importFile" type="file" accept=".xlsx,.xls,.csv,.txt"></label>
-        <label class="tool-card"><span class="tool-icon">📄</span><b>ورود PDF</b><input id="pdfFile" type="file" accept=".pdf,application/pdf"></label>
-        <label class="tool-card"><span class="tool-icon">🖼️</span><b>ورود عکس لیست</b><input id="imageFile" type="file" accept="image/png,image/jpeg,image/webp,image/bmp"></label>
-        <button id="exportCsv" type="button" class="tool-card"><span class="tool-icon">⬇️</span><b>خروجی (CSV)</b></button>
-        <button id="backupBtn" type="button" class="tool-card"><span class="tool-icon">🛡️</span><b>پشتیبان کامل</b></button>
-        <label class="tool-card"><span class="tool-icon">♻️</span><b>بازیابی پشتیبان</b><input id="restoreFile" type="file" accept=".json,application/json"></label>
-        <button id="settingsBtn" type="button" class="tool-card"><span class="tool-icon">⚙️</span><b>تنظیمات قیمت</b></button>
-        <button id="appearanceBtn" type="button" class="tool-card"><span class="tool-icon">🎨</span><b>تنظیمات ظاهر</b></button>
-      </div>
-      <div class="card">
-        <h3>مدیریت منابع قیمت</h3>
-        <form id="sourceForm" class="form-grid">
-          <label>نام منبع<input id="sourceName" placeholder="مثلاً لیست قیمت مهر"></label>
-          <label>نوع منبع<input id="sourceType" placeholder="Excel، PDF، تلگرام، دستی…"></label>
-          <button class="primary" type="submit">ثبت منبع دستی</button>
+      <section id="rules" class="pane">
+        <form id="ruleForm" class="panel-form">
+          <input id="ruleTerm" type="text" placeholder="نام یا عنوان" />
+          <input id="ruleBrand" type="text" placeholder="برند" />
+          <input id="rulePercent" type="number" step="0.1" value="10" placeholder="درصد سود" />
+          <button type="submit" class="primary-btn">ثبت قاعده</button>
         </form>
-        <div id="sourceList" class="stack"></div>
-      </div>
-    </section>
-  </main>
+        <div id="ruleList" class="mini-list"></div>
+      </section>
 
-  <footer class="hidden-on-home">
-    یدک‌پرایس · هسته اصلی + موبایل · داده‌ها به‌صورت محلی روی این دستگاه ذخیره می‌شوند
-  </footer>
+      <section id="history" class="pane">
+        <input id="historySearch" type="text" placeholder="جستجو در تاریخچه..." />
+        <div id="historyList" class="mini-list"></div>
+        <button id="historyMoreBtn" class="load-more hidden">بیشتر</button>
+        <button id="clearHistory" class="small-btn danger">پاک کردن تاریخچه</button>
+      </section>
 
-  <div id="toast" class="toast"></div>
+      <section id="tools" class="pane">
+        <div class="tool-grid">
+          <label class="tool-btn">
+            <input type="file" id="importFile" accept=".xlsx,.xls,.csv,.txt" hidden />
+            <span>ورود اکسل</span>
+          </label>
 
-  <div id="modalBackdrop" class="backdrop hidden">
-    <div class="modal">
-      <div class="modal-head">
-        <h3 id="modalTitle"></h3>
-        <button id="closeModal" class="icon-btn" style="border:none">✕</button>
+          <label class="tool-btn">
+            <input type="file" id="restoreFile" accept=".json" hidden />
+            <span>بازیابی</span>
+          </label>
+
+          <button id="backupBtn" class="tool-btn">پشتیبان</button>
+          <button id="exportCsv" class="tool-btn">خروجی CSV</button>
+          <button id="appearanceBtn" class="tool-btn">ظاهر</button>
+        </div>
+
+        <div id="sourceList" class="mini-list"></div>
+
+        <form id="sourceForm" class="panel-form">
+          <input id="sourceName" type="text" placeholder="نام منبع" />
+          <input id="sourceType" type="text" placeholder="نوع منبع" />
+          <button type="submit" class="primary-btn">ثبت منبع</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <div id="modalBackdrop" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modalTitle">عنوان</h3>
+        <button id="closeModal" class="modal-close">×</button>
       </div>
       <div id="modalBody"></div>
     </div>
   </div>
 
-  <script src="app.js?v=final1"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
