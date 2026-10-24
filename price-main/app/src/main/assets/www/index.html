@@ -8,41 +8,29 @@
 
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2">
 
   <title>یدک‌پرایس | قیمت‌یاب قطعات یدکی</title>
 
   <style>
-    /* استایل‌های پایه و سربرگ */
     .top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      padding: 22px 18px;
-      padding-top: calc(22px + env(safe-area-inset-top, 0px));
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      padding: 22px 18px; padding-top: calc(22px + env(safe-area-inset-top, 0px));
       min-height: 125px;
-      background:
-        radial-gradient(ellipse at 85% 15%, #193753 0%, transparent 55%),
-        linear-gradient(125deg, #040912, #0c1a2a 65%, #101d2b);
-      color: #fff;
-      border-bottom: 2px solid #c99b20;
-      box-shadow: 0 10px 30px rgba(0,0,0,.28);
+      background: radial-gradient(ellipse at 85% 15%, #193753 0%, transparent 55%), linear-gradient(125deg, #040912, #0c1a2a 65%, #101d2b);
+      color: #fff; border-bottom: 2px solid #c99b20; box-shadow: 0 10px 30px rgba(0,0,0,.28);
     }
     .brand-area { display: flex; align-items: center; gap: 14px; min-width: 0; }
     .brand-mark {
-      width: 58px; height: 58px; flex: 0 0 58px;
-      display: grid; place-items: center;
+      width: 58px; height: 58px; flex: 0 0 58px; display: grid; place-items: center;
       border: 1px solid #d6aa35; border-radius: 16px;
       background: linear-gradient(145deg, #192d41, #07111e);
-      color: #ffd34f; font-size: 32px;
-      box-shadow: 0 0 22px rgba(233,185,42,.12);
+      color: #ffd34f; font-size: 32px; box-shadow: 0 0 22px rgba(233,185,42,.12);
     }
     .top .eyebrow { color: #e8bd49; font-size: .7rem; font-weight: 800; letter-spacing: .4px; }
     .top h1 { margin-top: 5px; color: #ffd34f; font-size: 1.65rem; font-weight: 900; }
     .top p { color: #c0ccda; font-size: .78rem; line-height: 1.9; margin-top: 4px; }
     .top #installBtn { flex: 0 0 auto; }
-
     @media (max-width: 480px) {
       .top { padding-right: 12px; padding-left: 12px; min-height: 108px; gap: 8px; }
       .brand-area { gap: 9px; }
@@ -52,12 +40,8 @@
       .top p { font-size: .69rem; }
     }
     button { touch-action: manipulation; }
-    .tab, .primary, .ghost, .icon-btn, .small-btn {
-      transition: background-color .18s, border-color .18s, transform .18s;
-    }
-    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-      outline: 2px solid #ffd34f; outline-offset: 2px;
-    }
+    .tab, .primary, .ghost, .icon-btn, .small-btn { transition: background-color .18s, border-color .18s, transform .18s; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #ffd34f; outline-offset: 2px; }
   </style>
 </head>
 <body class="home-view">
@@ -74,7 +58,6 @@
     <button id="installBtn" class="ghost hidden" type="button">نصب برنامه</button>
   </header>
   
-  <!-- منوی کشویی یدک‌پرایس -->
   <button id="menuToggle" class="menu-toggle" type="button" aria-label="باز کردن منو">☰</button>
   <div id="menuShade" class="menu-shade"></div>
 
@@ -99,7 +82,6 @@
   </nav>
 
   <main>
-    <!-- صفحه اول تمام صفحه با ماشین -->
     <section class="car-hero" aria-label="صفحه اصلی یدک پرایس">
       <div class="hero-brand">
         <img class="hero-logo-image" src="brand-logo.svg" alt="لوگوی یدک پرایس" />
@@ -141,7 +123,6 @@
       </div>
     </section>
 
-    <!-- تب‌های مدیریت داخلی (مخفی در صفحه اصلی) -->
     <nav class="tabs hidden-on-home" aria-label="بخش‌های برنامه">
       <button class="tab active" type="button" data-tab="products">کالاها</button>
       <button class="tab" type="button" data-tab="rules">قواعد سود</button>
@@ -149,7 +130,6 @@
       <button class="tab" type="button" data-tab="tools">ورود و پشتیبان</button>
     </nav>
 
-    <!-- بخش کالاها -->
     <section id="products" class="pane active hidden-on-home">
       <div class="section-head">
         <div><h2>فهرست کالاها</h2></div>
@@ -160,7 +140,6 @@
       <button id="loadMoreBtn" class="ghost full hidden" type="button">نمایش موارد بیشتر</button>
     </section>
 
-    <!-- بخش قواعد سود -->
     <section id="rules" class="pane hidden-on-home">
       <div class="section-head"><div><h2>قواعد سود گروهی</h2></div></div>
       <form id="ruleForm" class="card form-grid">
@@ -172,7 +151,6 @@
       <div id="ruleList" class="stack"></div>
     </section>
 
-    <!-- بخش تاریخچه -->
     <section id="history" class="pane hidden-on-home">
       <div class="section-head">
         <div><h2>تاریخچه تغییرات</h2></div>
@@ -183,7 +161,6 @@
       <button id="historyMoreBtn" class="ghost full hidden" type="button">نمایش موارد بیشتر</button>
     </section>
 
-    <!-- بخش تنظیمات و ابزارها -->
     <section id="tools" class="pane hidden-on-home">
       <div class="section-head"><div><h2>ورود اطلاعات و پشتیبان</h2></div></div>
       <div class="tool-grid">
@@ -195,7 +172,6 @@
         <button id="settingsBtn" type="button" class="tool-card"><span class="tool-icon">⚙️</span><b>تنظیمات قیمت</b></button>
         <button id="appearanceBtn" type="button" class="tool-card"><span class="tool-icon">🎨</span><b>تنظیمات ظاهر</b></button>
       </div>
-
       <div class="card">
         <h3>مدیریت منابع قیمت</h3>
         <form id="sourceForm" class="form-grid">
@@ -214,7 +190,6 @@
 
   <div id="toast" class="toast"></div>
 
-  <!-- پاپ آپ ها -->
   <div id="modalBackdrop" class="backdrop hidden">
     <div class="modal">
       <div class="modal-head">
@@ -225,13 +200,12 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
-  <script src="ocr-engine.js"></script>
+  <!-- اضافه شدن v=new برای جلوگیری از کش مرورگر -->
+  <script src="app.js?v=new"></script>
+  <script src="ocr-engine.js?v=new"></script>
   
-  <!-- اسکریپت ضد کش دکمه‌ها و دستیار صوتی -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. مدیریت منوی کشویی
       const menu = document.getElementById('sideMenu');
       const shade = document.getElementById('menuShade');
       const toggle = document.getElementById('menuToggle');
@@ -243,29 +217,24 @@
         document.body.classList.remove('menu-open');
       }
 
-      if(toggle) {
-        toggle.addEventListener('click', () => {
-          if(menu) menu.classList.add('open');
-          if(shade) shade.classList.add('open');
-          document.body.classList.add('menu-open');
-        });
-      }
+      if(toggle) toggle.addEventListener('click', () => {
+        if(menu) menu.classList.add('open');
+        if(shade) shade.classList.add('open');
+        document.body.classList.add('menu-open');
+      });
       if(closeBtn) closeBtn.addEventListener('click', closeMenu);
       if(shade) shade.addEventListener('click', closeMenu);
 
-      // 2. مدیریت تب‌ها و صفحات
       function selectTab(name) {
         document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
         document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === name));
-        
-        // فراخوانی توابع app.js در صورت وجود
         if(typeof renderProducts === 'function' && name === 'products') renderProducts(true);
         if(typeof renderRules === 'function' && name === 'rules') renderRules();
         if(typeof renderHistory === 'function' && name === 'history') renderHistory(true);
         if(typeof renderSources === 'function' && name === 'tools') renderSources();
       }
 
-      function goToPage(target) {
+      window.goToPage = function(target) {
         closeMenu();
         if (target === 'home') {
           document.body.classList.add('home-view');
@@ -298,43 +267,6 @@
       document.querySelectorAll('.tab').forEach(b => {
         b.addEventListener('click', () => goToPage(b.dataset.tab));
       });
-
-      // 3. دستیار صوتی هوشمند
-      const voiceBtn = document.getElementById('voiceBtn');
-      if (voiceBtn) {
-        voiceBtn.addEventListener('click', () => {
-          const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-          if (!SR) {
-            if(typeof notify === 'function') notify('دستیار صوتی پشتیبانی نمی‌شود.');
-            else alert('دستیار صوتی پشتیبانی نمی‌شود.');
-            return;
-          }
-          const rec = new SR();
-          rec.lang = 'fa-IR';
-          rec.interimResults = false;
-          
-          rec.onstart = () => {
-            if(typeof notify === 'function') notify('گوش می‌دهم... (مثلاً: برو به تنظیمات)');
-          };
-          
-          rec.onresult = e => {
-            const text = e.results[0][0].transcript.trim().toLowerCase();
-            if (text.includes('صفحه اصلی') || text.includes('خانه')) goToPage('home');
-            else if (text.includes('تنظیمات') || text.includes('ظاهر')) goToPage('settingsBtn');
-            else if (text.includes('قواعد') || text.includes('سود')) goToPage('rules');
-            else if (text.includes('تاریخچه')) goToPage('history');
-            else if (text.includes('اکسل') || text.includes('ورود')) goToPage('tools');
-            else {
-              goToPage('products');
-              const s = document.getElementById('search');
-              if(s) s.value = text;
-              if(typeof renderProducts === 'function') renderProducts(true);
-              if(typeof notify === 'function') notify(`جستجو: ${text}`);
-            }
-          };
-          rec.start();
-        });
-      }
     });
   </script>
 </body>
