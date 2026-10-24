@@ -182,10 +182,12 @@ function openDB() {
         s.createIndex('oem', 'oem', { unique: false });
         s.createIndex('barcode', 'barcode', { unique: false });
       }
+
       for (const [name, key] of [['rules', 'id'], ['history', 'id'], ['settings', 'key'], ['sources', 'id']]) {
         if (!d.objectStoreNames.contains(name)) d.createObjectStore(name, { keyPath: key });
       }
     };
+
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
@@ -218,12 +220,15 @@ function put(store, value) {
 
 function putMany(store, values) {
   if (!values || values.length === 0) return Promise.resolve();
+
   return new Promise((resolve, reject) => {
     let tx;
     try {
       tx = db.transaction(store, 'readwrite');
       const objectStore = tx.objectStore(store);
+
       for (const value of values) objectStore.put(value);
+
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
     } catch (err) {
@@ -290,13 +295,17 @@ function matchedRule(p, rules) {
 
 function profitInfo(p, rules, defaultProfit) {
   if (isFinalPrice(p)) return { percent: 0, origin: 'final', label: 'قیمت نهایی · بدون سود' };
+
   if (p.itemProfitPercent !== null && p.itemProfitPercent !== undefined && p.itemProfitPercent !== '') {
     return { percent: Number(p.itemProfitPercent), origin: 'item', label: `سود اختصاصی ${fmt(Number(p.itemProfitPercent))}%` };
   }
+
   const rule = matchedRule(p, rules);
+
   if (rule) {
     return { percent: Number(rule.percent), origin: 'group', label: `قاعده (${[rule.term, rule.brand].filter(Boolean).join(' ')}) ${fmt(rule.percent)}٪` };
   }
+
   return { percent: Number(defaultProfit), origin: 'default', label: `سود پیش‌فرض ${fmt(defaultProfit)}٪` };
 }
 
@@ -307,7 +316,14 @@ function sellPrice(p, rules, defaultProfit) {
 
 /* ------------------------------ موتور جست‌وجو ------------------------------ */
 function matchTier(p, qWords, qNorm) {
-  const name = norm(p.name), brand = norm(p.brand), cars = norm((p.cars || []).join(' ')), code = norm(p.code), oem = norm(p.oem), barcode = norm(p.barcode), alt = norm((p.altNames || []).join(' '));
+  const name = norm(p.name),
+        brand = norm(p.brand),
+        cars = norm((p.cars || []).join(' ')),
+        code = norm(p.code),
+        oem = norm(p.oem),
+        barcode = norm(p.barcode),
+        alt = norm((p.altNames || []).join(' '));
+
   if (qNorm && (code === qNorm || oem === qNorm) && (code || oem)) return 0;
   if (qNorm && barcode && barcode === qNorm) return 1;
   if (qNorm && name === qNorm) return 2;
@@ -401,6 +417,7 @@ async function populateFilterOptions() {
 
 async function renderProducts(resetPage) {
   if (resetPage) productPage = 1;
+
   const rows = await getFiltered();
 
   if ($('countStat')) $('countStat').textContent = `${fmt(rows.length)} کالا`;
@@ -552,5 +569,4 @@ async function renderRules() {
   if ($('ruleList')) {
     $('ruleList').innerHTML = rs.map(r => `
       <div class="list-row">
-        <b>${esc(r.term)} ${r.brand ? '· ' + esc(r.brand) : ''}</b>
-        <small>سو
+        <b>${esc(r.term)} 
